@@ -76,9 +76,9 @@ for j = 1:1%length(sub)
         cfg = [];
      % Abtastrate ist 500Hz, daher 2, da alle 2ms aufgenommen wird
         cfg.samp_interval = 2;
-     % Segmentlänge (geht z.B. bis 2000ms aber der letzte Punkt der aufgenommen wird ist 1998 (2000 - 2)
+     % Segmentlï¿½nge (geht z.B. bis 2000ms aber der letzte Punkt der aufgenommen wird ist 1998 (2000 - 2)
         cfg.epoch_twd = [-100,1198];
-     % nicht ändern
+     % nicht ï¿½ndern
         cfg.comp.name = {'s','r'}; %'c': based on visual inspection (Usually a component is identified by a big and wide hump in the late time window )
      % response trigger
         cfg.comp.twd = {[0,600],[-300,300]}; % rt set according to RIDE_implementtation.pptx p.15
@@ -187,7 +187,7 @@ for section = 1:1  %preparation, down_sampling----------------------------------
     % end
     % %-------------------------------------------------------------
 
-    [d1,d2,d3] = size(data);%new size after down samping
+    %[d1,d2,d3] = size(data);%new size after down samping
     
     
     % %----------only for microsaccade-------------------------------

@@ -56,7 +56,7 @@ def generate_sine_data(
         r_end_ix = int(r_latency + r_duration / 2.0)
         data[r_start_ix:r_end_ix, channel_ix, trial_ix] += r
 
-    return data
+    return data, r_latencies
 
 
 def plot_input_data(data):

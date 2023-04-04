@@ -16,3 +16,4 @@ __pycache__/
 /matlab/matlab_example/single_trials/
 /matlab/matlab_example/single_trials_small/
 /matlab/matlab_example/chanlocs.mat
+*.DS_store
