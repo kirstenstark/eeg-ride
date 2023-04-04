@@ -171,6 +171,7 @@ output_dir = fullfile(ridefolder, 'output');
 j = 1;
 k = 1;
   load([ridefolder,'mat\',sub{j},'_',con{k},'.mat'],'data','rt');    % Path definitions correct?
+  
         cfg = [];
      % Abtastrate ist 500Hz, daher 2, da alle 2ms aufgenommen wird
         cfg.samp_interval = 2;
