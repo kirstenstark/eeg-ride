@@ -168,10 +168,12 @@ end
 % end
 
 
-for section = 1:1  %preparation, down_sampling-----------------------------------------------------------------
+%for section = 1:1  %preparation, down_sampling-----------------------------------------------------------------
     [d1,d2,d3] = size(data);
     epoch_length = d1;
+    
     erp = mean(data,3);results.erp = erp;%original ERP
+    %%
     results.latency0 = cfg.comp.latency;%save the original latency information, i.e., RT
 
     % %------------down sample data---------------------
@@ -213,6 +215,9 @@ for section = 1:1  %preparation, down_sampling----------------------------------
             % if cfg.comp.twd{j}(2)<cfg.comp.twd{j}(1) cfg.comp.twd{j} = [cfg.comp.twd{j}(2)-1 cfg.comp.twd{j}(2)]';end % !!! a bit weird, rather error if twd(2) < twd(1)
     end
     
+    
+    %% CONTINUE HERE
+    
     % %--------specify the searching duration-----------------------
     % if isfield(cfg,'dur')
     %     for j = 1:length(cfg.comp.name)
@@ -225,7 +230,7 @@ for section = 1:1  %preparation, down_sampling----------------------------------
     % end
     % %----------------------------------------------------------------
 
-end
+
     
         
 
