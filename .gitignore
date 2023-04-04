@@ -1,3 +1,17 @@
 __pycache__/
 *.egg-info
 /matlab/example/
+/matlab/matlab_example/BVA_info/
+/matlab/matlab_example/BVAinfo/
+/matlab/matlab_example/eeg_log/
+/matlab/matlab_example/final_log/
+/matlab/matlab_example/log/
+/matlab/matlab_example/log_c/
+/matlab/matlab_example/mat/
+/matlab/matlab_example/other/
+/matlab/matlab_example/output/
+/matlab/matlab_example/raw/
+/matlab/matlab_example/raw_eeg/
+/matlab/matlab_example/single_trials/
+/matlab/matlab_example/single_trials_small/
+/matlab/matlab_example/chanlocs.mat
