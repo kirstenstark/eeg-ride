@@ -66,5 +66,3 @@ for j in range(cfg['comp_num']):
     
     cfg['comp']['twd'][j] = np.fix((cfg['comp']['twd'][j] - cfg['epoch_twd'][0])/cfg['re_samp'])+[1,-1]
 
-def add_2:
-    
