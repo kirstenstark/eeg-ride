@@ -1,5 +1,6 @@
 __pycache__/
 *.egg-info
+/data/
 /matlab/example/
 /matlab/matlab_example/BVA_info/
 /matlab/matlab_example/BVAinfo/
