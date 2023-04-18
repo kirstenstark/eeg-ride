@@ -1,9 +1,9 @@
-from pyprojroot.here import here
-from scipy.io import savemat, loadmat
-from tests import generate_sine_data, plot_input_data
 import numpy as np
+from pyprojroot.here import here
 from scipy.fft import fft, ifft
- 
+from scipy.io import loadmat, savemat
+from tests import generate_sine_data, plot_input_data
+
 # # Generate simulated sine data
 # data, rt = generate_sine_data()
 # plot_input_data(data)
@@ -23,8 +23,8 @@ rt = data_dict['rt']
 cfg = {'samp_interval': 2,
        'epoch_twd': np.array([-100, 1198]),
        'comp': {'name': ['s', 'r'],
-                 'twd': [[0, 600], [-300, 300]],
-                 'latency': [0, rt]}}
+                'twd': [[0, 600], [-300, 300]],
+                'latency': [0, rt]}}
 cfg['comp_num'] = len(cfg['comp']['name'])
 cfg['rwd'] = 200
 cfg['re_samp'] = cfg['samp_interval']
@@ -34,11 +34,11 @@ assert len(cfg['comp']['name']) > 1, 'At least two components are required'
 
 cfg0 = cfg.copy()
 
-## section 1
+# section 1
 d1, d2, d3 = data.shape
 epoch_length = d1
 erp = data.mean(axis=2)
-results={'latency0': cfg['comp']['latency']}
+results = {'latency0': cfg['comp']['latency']}
 
 # TODO: Do downsampling here and re-obtain d1, d2, d3
 
@@ -50,22 +50,22 @@ def round_like_matlab(x):
 
 
 for j in range(cfg['comp_num']):
-    
+
     if isinstance(cfg['comp']['latency'][j], int):
         int_value = cfg['comp']['latency'][j]
         print(f'WARNING: Extending integer latency {int_value} to a vector ' +
               f'of {int_value}s (one per trial)')
         cfg['comp']['latency'][j] = np.array([int_value] * d3)
-    
+
     if cfg['comp']['name'][j] == 'r':
         cfg['comp']['twd'][j] = cfg['comp']['twd'][j] + np.median(results['latency0'][j])
         cfg['comp']['twd'][j][cfg['comp']['twd'][j] < cfg['rwd']] = cfg['rwd']
         cfg['comp']['twd'][j][cfg['comp']['twd'][j] > cfg['epoch_twd'][1]] = cfg['epoch_twd'][1]
 
     cfg['comp']['latency'][j] = cfg['comp']['latency'][j] / cfg['re_samp']
-    cfg['comp']['latency'][j] = round_like_matlab(cfg['comp']['latency'][j]-np.median(cfg['comp']['latency'][j])) # Still floats, might need to be ints
-    
-    cfg['comp']['twd'][j] = np.fix((cfg['comp']['twd'][j] - cfg['epoch_twd'][0])/cfg['re_samp'])+[1,-1]
+    cfg['comp']['latency'][j] = round_like_matlab(cfg['comp']['latency'][j]-np.median(cfg['comp']['latency'][j]))  # Still floats, might need to be ints
+
+    cfg['comp']['twd'][j] = np.fix((cfg['comp']['twd'][j] - cfg['epoch_twd'][0])/cfg['re_samp'])+[1, -1]
 
 
 stop = 1
@@ -99,7 +99,7 @@ def ride_iter(data, cfg):
         max_latency[j] = cfg['comp']['latency'][j].max()
         min_latency[j] = cfg['comp']['latency'][j].min()
         length_c[j] = d1 + max_latency[j] - min_latency[j]
-        
+
     com_c = np.zeros((d1, cfg['comp_num']))
     com_c1 = np.zeros((d1, d2, cfg['comp_num']))
     amp_c = np.zeros((d2, cfg['comp_num']))
@@ -112,7 +112,7 @@ def filtering20(x, a, b):
     f = x
     for j in range(x.shape[1]):
         f[:, j] = filtering10(x[:, j], a, b)
-    
+
     return f
 
 
@@ -123,16 +123,16 @@ def filtering10(x, a, b):
     x = x - x0
     n = 10 * len(x)
     Y = fft(x, n)
-    
+
     b = int(b)
     H = np.concatenate([np.zeros((1, a)),
-                        np.expand_dims(Y[a : b + 1], axis=0),
+                        np.expand_dims(Y[a: b + 1], axis=0),
                         np.zeros((1, n - b * 2 - 1)),
-                        np.expand_dims(Y[n - b : n - a + 1], axis=0),
+                        np.expand_dims(Y[n - b: n - a + 1], axis=0),
                         np.zeros((1, a - 1))], axis=1)
     H = H.transpose()
 
     f = ifft(H, axis=0).real
     f = np.squeeze(f)
-    
+
     return f[:len(x)]
