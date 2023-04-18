@@ -90,7 +90,19 @@ def ride_iter(data, cfg):
     data0 = data.copy()
 
     data = filtering20(data, 1, np.fix(10 * 20 * cfg['re_samp'] * d1 / 1000))
-    # TODO: Compare with MNE filter
+    
+    # Comparison with MNE filter
+    from mne.filter import filter_data
+    import matplotlib.pyplot as plt
+    data_mne = filter_data(data0.copy().astype(np.float64).T,
+                           sfreq=1000 / cfg['re_samp'],
+                           l_freq=1.5, h_freq=18.0).T
+
+    ix = 20
+    plt.plot(data0[:, ix])
+    plt.plot(data[:, ix])
+    plt.plot(data_mne[:, ix])
+    plt.legend(labels=['"Unfiltered"', 'RIDE', 'MNE'])
 
     max_latency = np.zeros((cfg['comp_num']))
     min_latency = np.zeros((cfg['comp_num']))
@@ -109,7 +121,7 @@ def ride_iter(data, cfg):
 
 def filtering20(x, a, b):
 
-    f = x
+    f = x.copy()
     for j in range(x.shape[1]):
         f[:, j] = filtering10(x[:, j], a, b)
 
