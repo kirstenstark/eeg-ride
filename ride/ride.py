@@ -32,6 +32,8 @@ cfg['re_samp'] = cfg['samp_interval']
 # start RIDE correction
 assert len(cfg['comp']['name']) > 1, 'At least two components are required'
 
+# TODO: make sure order is always s, (c), r
+
 cfg0 = cfg.copy()
 
 # section 1
@@ -46,7 +48,7 @@ results = {'latency0': cfg['comp']['latency']}
 def round_like_matlab(x):
     """Round to nearest integer, like MATLAB's round() function."""
 
-    return np.trunc(x + np.copysign(0.5, x))
+    return np.trunc(x + np.copysign(0.5, x)).astype(int)
 
 
 for j in range(cfg['comp_num']):
@@ -63,7 +65,7 @@ for j in range(cfg['comp_num']):
         cfg['comp']['twd'][j][cfg['comp']['twd'][j] > cfg['epoch_twd'][1]] = cfg['epoch_twd'][1]
 
     cfg['comp']['latency'][j] = cfg['comp']['latency'][j] / cfg['re_samp']
-    cfg['comp']['latency'][j] = round_like_matlab(cfg['comp']['latency'][j]-np.median(cfg['comp']['latency'][j]))  # Still floats, might need to be ints
+    cfg['comp']['latency'][j] = round_like_matlab(cfg['comp']['latency'][j]-np.median(cfg['comp']['latency'][j])) 
 
     cfg['comp']['twd'][j] = np.fix((cfg['comp']['twd'][j] - cfg['epoch_twd'][0])/cfg['re_samp'])+[1, -1]
 
@@ -79,11 +81,13 @@ cfg1['inner_iter'] = 100
 c_l = np.zeros((d1, cfg['comp_num'], d2))
 c_sl = c_l
 
-for c in range(d2):
-    rst = ride_iter(np.squeeze(data[:, c, :]), cfg1)
+# for c in range(d2):
+#     rst = ride_iter(np.squeeze(data[:, c, :]), cfg1)
 
 
 def ride_iter(data, cfg):
+    #cfg = cfg1
+    # data = data[:, 61, :]
 
     d1, d2 = data.shape
 
@@ -92,9 +96,9 @@ def ride_iter(data, cfg):
     data = filtering20(data, 1, np.fix(10 * 20 * cfg['re_samp'] * d1 / 1000))
     # TODO: Compare with MNE filter
 
-    max_latency = np.zeros((cfg['comp_num']))
-    min_latency = np.zeros((cfg['comp_num']))
-    length_c = np.zeros((cfg['comp_num']))
+    max_latency = np.zeros((cfg['comp_num']), dtype=int)
+    min_latency = np.zeros((cfg['comp_num']), dtype=int)
+    length_c = np.zeros((cfg['comp_num']), dtype=int)
     for j in range(cfg['comp_num']):
         max_latency[j] = cfg['comp']['latency'][j].max()
         min_latency[j] = cfg['comp']['latency'][j].min()
@@ -104,7 +108,56 @@ def ride_iter(data, cfg):
     com_c1 = np.zeros((d1, d2, cfg['comp_num']))
     amp_c = np.zeros((d2, cfg['comp_num']))
 
-    ### CONTINUE HERE ###
+    trend_i = cfg['comp_num']-1
+    stream_flow = np.arange(cfg['comp_num'])
+    for c in range(cfg['comp_num']) :
+        if cfg['comp']['name'][c] == 'r':
+            trend_i = c-1
+    if trend_i == cfg['comp_num'] : 
+        stream_flow = np.concatenate([np.array([trend_i]), np.arange(trend_i)])
+    if trend_i == cfg['comp_num']-2 : 
+        stream_flow = np.concatenate([np.array([trend_i]), np.arange(trend_i), np.array([cfg['comp_num']-1])])
+    if trend_i == 0 : 
+        stream_flow = np.array([1,0])
+
+    l1 = np.zeros((cfg['inner_iter'],cfg['comp_num']))
+    stop = 0
+    stop_c = np.zeros((cfg['comp_num'],1))
+    com_old=com_c.copy()
+
+    for iter in np.arange(cfg['inner_iter']) :
+        
+        if iter + 1 == cfg['inner_iter']:
+            stop = 1
+        
+        # track the convergence
+
+        # !!!! CONTINUE HERE, AFTER FINISHING FIRST ITERATION OF FOR LOOP
+        # TO DO: add if-loop for iter > 1
+
+        #if iter > 1: 
+          #  for c in np.arange(cfg['comp_num']):
+           #     l1[iter-2,c]=np.sum()
+                # continue here
+        
+        #for c in np.arange(cfg['comp_num']):
+            #com_old[:,c]=com_c[:,c] # decision of the termination of iteration of each component
+        ## CAUTION: for-loop seems unnecessary
+        com_old=com_c.copy()
+
+        for c in stream_flow: 
+            if stop_c[c] == 0:
+                temp = data.copy()
+                for j in np.arange(cfg['comp_num']):
+                    if j != c:
+                        temp = temp-com_c1[:,:,j]
+                residue = temp.copy()
+                temp = np.empty((length_c[c],d2))
+                temp[:] = np.nan
+                for j in np.arange(d2):
+                    temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],d1-cfg['comp']['latency'][c][j]+max_latency[c]),j] = residue[:,j]
+
+                 ### CONTINUE HERE ###
 
 
 def filtering20(x, a, b):
