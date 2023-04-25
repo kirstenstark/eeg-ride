@@ -43,8 +43,6 @@ for sec = 1:1%default values and initial settings
 
         end
 
-        %% CONTINUE HERE
-
                         trend_i = cfg.comp_num;stream_flow = 1:cfg.comp_num;
                         for c = 1:cfg.comp_num
                             if cfg.comp.name{c}(1) == 'r' trend_i = c-1;end
@@ -105,6 +103,7 @@ for code = 1:1
 
     %                         if channel == 44 && iter==inner_iter&&c==2 figure;subplot(1,2,1);plot(temp);hold on;plot(mean_nan(temp,2),'linewidth',6);end
 
+    %% CONTINUE HERE (25.04.2023)
 
                             temp = RIDE_detrend(temp,[1 1+fix((cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1))*bd) ... % !!! onset and offset of window edges
                             fix((cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1))*(1-bd)) cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1)]+max_latency(c)+cfg.comp.twd{c}(1));
