@@ -28,6 +28,7 @@ cfg = {'samp_interval': 2,
 cfg['comp_num'] = len(cfg['comp']['name'])
 cfg['rwd'] = 200
 cfg['re_samp'] = cfg['samp_interval']
+cfg['bd'] = 0.2 # Alpha value for Tukey window
 
 # start RIDE correction
 assert len(cfg['comp']['name']) > 1, 'At least two components are required'
@@ -55,8 +56,7 @@ for j in range(cfg['comp_num']):
 
     if isinstance(cfg['comp']['latency'][j], int):
         int_value = cfg['comp']['latency'][j]
-        print(f'WARNING: Extending integer latency {int_value} to a vector ' +
-              f'of {int_value}s (one per trial)')
+        print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
         cfg['comp']['latency'][j] = np.array([int_value] * d3)
 
     if cfg['comp']['name'][j] == 'r':
@@ -116,6 +116,34 @@ def filtering10(x, a, b):
     return f[:len(x)]
 
 
+def ride_detrend(data, twd):
+
+    # # For debugging
+    # data = temp.copy()
+    # twd = np.array([51, 110, 288, 348])
+
+    index = np.isnan(data)
+    data[index] = 0.0
+    d1, d2 = data.shape
+    d3 = 1 # MATLAB uses `d1, d2, d3 = data.shape` even though `data` is 2D
+    d = [(twd[3] + twd[2]) / 2 - (twd[1] + twd[0]) / 2]
+
+    temp0 = np.tile(np.arange(d1) + 1, [d2, d3]).T
+
+    a = data[np.arange(twd[0], twd[1] + 1), :].mean(axis=0, keepdims=True)
+    b = data[np.arange(twd[2], twd[3] + 1), :].mean(axis=0, keepdims=True)
+    temp = (b - a) / d
+    data = data - temp0 * temp[np.zeros(d1, dtype=int), :]
+
+    temp = data[np.arange(twd[0], twd[1] + 1), :].mean(axis=0, keepdims=True)
+    data = data - temp[np.zeros(d1, dtype=int), :]
+
+    f = data.copy()
+    f[index] = np.nan
+
+    return f
+
+
 def ride_iter(data, cfg):
     
     # These are the inputs that get passed to the function
@@ -124,6 +152,7 @@ def ride_iter(data, cfg):
     data = data[:, 61, :]
 
     d1, d2 = data.shape
+    bd = cfg['bd']
 
     data0 = data.copy()
 
@@ -191,4 +220,10 @@ def ride_iter(data, cfg):
                 for j in np.arange(d2):
                     temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],d1-cfg['comp']['latency'][c][j]+max_latency[c]),j] = residue[:,j]
 
-                 ### CONTINUE HERE ###
+                temp = ride_detrend(
+                    temp,
+                    np.array([0,
+                              np.fix((cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0]) * bd),
+                              np.fix((cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0]) * (1 - bd)) - 1,
+                              cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0] - 1], dtype=int) \
+                                + max_latency[c] + int(cfg['comp']['twd'][c][0]))
