@@ -64,12 +64,13 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
     stop_c = zeros(cfg.comp_num,1);
             
         %%    
-    %for iter = 1:cfg.inner_iter % !!! always 1:100 -> for loops ends in line 260
+    for iter = 1:cfg.inner_iter % !!! always 1:100 -> for loops ends around line 260
 %                 disp(iter);
- %% ATTENTION: WHILE FOR-LOOP IS OUTCOMMENTED -> THIS SECTION NEEDS TO BE RUN TWICE, ONCE WITH ITER=1, ONCE WITH iter = 100
-                %iter=1;
-                iter = 100; % only if loop is not run, first set to 1 to generate com_old, then set to 100 
-                if iter == cfg.inner_iter stop = 1;end
+                % %% ATTENTION: WHEN FOR-LOOP IS OUTCOMMENTED -> THIS SECTION NEEDS TO BE RUN TWICE, ONCE WITH ITER=1, ONCE WITH iter = 100
+                % iter=1;
+                % iter = 100; % only if loop is not run, first set to 1 to generate com_old, then set to 100
+
+                % if iter == cfg.inner_iter stop = 1;end
                 
                 for track_conv = 1:1%track the convergence
                     if iter > 2 
@@ -92,11 +93,9 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
 %                 if channel == 3 temp555(:,iter) = com_c(:,2);end
 %                 temp555(iter) = com_c(500,2);
 
-
-%% CURRENT LOOP (16.5.2023)
-               % for c = stream_flow % - loop stops in line 181
-               c = 1; % only if loop is outcommented
-                   % if stop_c(c) == 0 % - loop stops in line 182
+               for c = stream_flow % - loop stops in line 178
+               %c = 1; % only if loop is outcommented
+                   if stop_c(c) == 0 % - loop stops in line 179
                         temp = data;
                         for j = 1:cfg.comp_num
                             if j~=c temp = temp - com_c1(:,:,j);end
@@ -160,27 +159,24 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
                                         %         
                                         % f = data;
                                         % f(index) = nan;
-                                        % 
-
-
-
-
-%% CONTINUE HERE (16.5.2023)
-
-
+                                        %
 
                         temp0 = median_2d(temp');
                         temp0([1:cfg.comp.twd{c}(1)+max_latency(c),cfg.comp.twd{c}(2)+max_latency(c):length_c(c)])=0;
                         
                         temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(2)+max_latency(c)))=...
                             temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(2)+max_latency(c))).*RIDE_tukey(cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1)+1,bd*2);
+                        
                         temp1 = temp0(:,ones(1,d2));
                         temp1(isnan(temp)) = nan;
-                        temp1 = (reshape(temp1(~isnan(temp1)),d1,d2));
+                        
+                        temp1(:, 45) = nan;
+                        
+                        %temp1 = (reshape(temp1(~isnan(temp1)),d1,d2)); % We're trying to keep any NaNs in the data
                         com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
-                        com_c1(:,:,c) = temp1;
-                    % end % - end of loop (line 99)
-                %end % - end of stream flow loop (line 95)
+                        com_c1(:,:,c) = temp1; % Errors because for the r component, the 1st size of `temp1` (determined by `length_c`) is not 650
+                    end % - end of loop (line 98)
+                end % - end of stream flow loop (line 96)
 
  %%
 
