@@ -152,6 +152,7 @@ def ride_detrend(data, twd):
 def median_2d(x):
     # !! Median is probably biased if nan trials are present b/c they are set to zero
     # TODO: simulate this and see if it's a problem
+    x = x.copy()
     x[np.isnan(x)] = 0.0 # zeros padding
     s = x.shape
     x = np.sort(x, axis=0)
