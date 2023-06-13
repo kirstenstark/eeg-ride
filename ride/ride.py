@@ -278,7 +278,7 @@ def ride_iter(data, cfg):
 
                 # TODO: !!!! IMPORTANT: Next line is only for testing purposes, delete later!! 
                 #temp1[:,44] = np.nan     # # TODO: !!!! IMPORTANT: This line is only for testing purposes, delete later!!            
-                # temp1 = np.reshape(temp1[~np.isnan(temp1)], (d1,d2)) # TODO: This line may also be needed? 
+                temp1 = np.reshape(temp1[~np.isnan(temp1)], (d1, d2))
                 com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1)]
                 com_c1[:,:,c] = temp1
             # End of if-loop
