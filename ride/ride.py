@@ -223,9 +223,9 @@ def ride_iter(data, cfg):
     stop_c = np.zeros((cfg['comp_num'],1))
     com_old=com_c.copy()
 
-    # TODO make sure loop works for all iterations: for iter in np.arange(cfg['inner_iter']) :
-    iter = 1 # TODO: for loop needed
-        
+    # for iter in np.arange(1, 2): # For testing purposes, only runs iter = 1
+    for iter in np.arange(cfg['inner_iter']):
+
         if iter + 1 == cfg['inner_iter']:
             stop = 1
         
