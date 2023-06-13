@@ -46,13 +46,16 @@ epoch_length = d1
 erp = data.mean(axis=2)
 results = {'latency0': cfg['comp']['latency']}
 
-# TODO: Do downsampling here and re-obtain d1, d2, d3
-
 
 def round_like_matlab(x):
     """Round to nearest integer, like MATLAB's round() function."""
 
     return np.trunc(x + np.copysign(0.5, x)).astype(int)
+
+
+rs = cfg['re_samp'] / cfg['samp_interval']
+data = data[round_like_matlab(np.linspace(0, d1 - 1, int(d1 / rs))), :, :]
+d1, d2, d3 = data.shape # New size after down samping
 
 
 for j in range(cfg['comp_num']):
