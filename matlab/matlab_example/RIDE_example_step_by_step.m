@@ -177,9 +177,9 @@ end
     %%
     results.latency0 = cfg.comp.latency;%save the original latency information, i.e., RT
 
-    % %------------down sample data---------------------
-    % rs = (cfg.re_samp/cfg.samp_interval);
-    % data = data(round(linspace(1,d1,fix(d1/rs))),:,:);
+    %------------down sample data---------------------
+    rs = (cfg.re_samp/cfg.samp_interval);
+    data = data(round(linspace(1,d1,fix(d1/rs))),:,:);
     
     % %----------only if using specified template to measure C------------
     % if isfield(cfg,'template')

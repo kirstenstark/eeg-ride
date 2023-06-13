@@ -63,9 +63,10 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
     l1 = [];stop = 0;
     stop_c = zeros(cfg.comp_num,1);
             
-        %%    
-    for iter = 1:cfg.inner_iter % !!! always 1:100 -> for loops ends around line 260
+ %%    
+    for iter = 1:1%cfg.inner_iter % !!! always 1:100 -> for loops ends around line 260
 %                 disp(iter);
+                fprintf('goes into loop')
                 % %% ATTENTION: WHEN FOR-LOOP IS OUTCOMMENTED -> THIS SECTION NEEDS TO BE RUN TWICE, ONCE WITH ITER=1, ONCE WITH iter = 100
                 % iter=1;
                 % iter = 100; % only if loop is not run, first set to 1 to generate com_old, then set to 100
@@ -170,9 +171,9 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
                         temp1 = temp0(:,ones(1,d2));
                         temp1(isnan(temp)) = nan;
                         
-                        temp1(:, 45) = nan;
+                        %temp1(:, 45) = nan;
                         
-                        %temp1 = (reshape(temp1(~isnan(temp1)),d1,d2)); % We're trying to keep any NaNs in the data
+                        temp1 = (reshape(temp1(~isnan(temp1)),d1,d2)); % We're trying to keep any NaNs in the data
                         com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
                         com_c1(:,:,c) = temp1; % Errors because for the r component, the 1st size of `temp1` (determined by `length_c`) is not 650
                     end % - end of loop (line 98)
@@ -255,7 +256,7 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
 %                 end
 %                 
 % 
-%     end
+     end
 %     
 %   %% 
 %             
