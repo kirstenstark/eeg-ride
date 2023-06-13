@@ -3,7 +3,7 @@ from pyprojroot.here import here
 from scipy.fft import fft, ifft
 from scipy.io import loadmat, savemat
 
-# import matplotlib.pyplot as plt # for plotting 
+# import matplotlib.pyplot as plt # for plotting
 
 # from tests import generate_sine_data, plot_input_data
 
@@ -31,7 +31,7 @@ cfg = {'samp_interval': 2,
 cfg['comp_num'] = len(cfg['comp']['name'])
 cfg['rwd'] = 200
 cfg['re_samp'] = cfg['samp_interval']
-cfg['bd'] = 0.2 # Alpha value for Tukey window
+cfg['bd'] = 0.2  # Alpha value for Tukey window
 
 # start RIDE correction
 assert len(cfg['comp']['name']) > 1, 'At least two components are required'
@@ -55,7 +55,7 @@ def round_like_matlab(x):
 
 rs = cfg['re_samp'] / cfg['samp_interval']
 data = data[round_like_matlab(np.linspace(0, d1 - 1, int(d1 / rs))), :, :]
-d1, d2, d3 = data.shape # New size after down samping
+d1, d2, d3 = data.shape  # New size after down samping
 
 
 for j in range(cfg['comp_num']):
@@ -131,7 +131,7 @@ def ride_detrend(data, twd):
     index = np.isnan(data)
     data[index] = 0.0
     d1, d2 = data.shape
-    d3 = 1 # MATLAB uses `d1, d2, d3 = data.shape` even though `data` is 2D
+    d3 = 1  # MATLAB uses `d1, d2, d3 = data.shape` even though `data` is 2D
     d = [(twd[3] + twd[2]) / 2 - (twd[1] + twd[0]) / 2]
 
     temp0 = np.tile(np.arange(d1) + 1, [d2, d3]).T
@@ -149,17 +149,20 @@ def ride_detrend(data, twd):
 
     return f
 
+
 def median_2d(x):
     # !! Median is probably biased if nan trials are present b/c they are set to zero
     # TODO: simulate this and see if it's a problem
     x = x.copy()
-    x[np.isnan(x)] = 0.0 # zeros padding
+    x[np.isnan(x)] = 0.0  # zeros padding
     s = x.shape
     x = np.sort(x, axis=0)
-    y = x.flatten(order='F')[(round_like_matlab(s[0]/2) + np.arange(0, s[1])*s[0])-1]
+    y = x.flatten(order='F')[(round_like_matlab(
+        s[0]/2) + np.arange(0, s[1])*s[0])-1]
     return y
 
-def RIDE_tukey(n,r):
+
+def RIDE_tukey(n, r):
     n = int(n)
     t = np.linspace(0, 1, n)
     # Define period of the taper as 1/2 period of a sine wave.
@@ -167,20 +170,18 @@ def RIDE_tukey(n,r):
     tl = int(np.floor(per*(n-1))+1)
     th = n-tl+1
     # Window is defined in three sections: taper, constant, taper
-    f = np.concatenate([(1+np.cos(np.pi/per*(t[np.arange(tl)] - per)))/2, 
-                       np.ones((th-tl-1)), 
+    f = np.concatenate([(1+np.cos(np.pi/per*(t[np.arange(tl)] - per)))/2,
+                       np.ones((th-tl-1)),
                        (1+np.cos(np.pi/per*(t[th-1:] - 1 + per)))/2])
-    
-    if n==1: 
+
+    if n == 1:
         f = 1
 
     return f
 
 
-
-
 def ride_iter(data, cfg):
-    
+
     # These are the inputs that get passed to the function
     # Remove these two lines once the function is complete!
     cfg = cfg1
@@ -208,27 +209,27 @@ def ride_iter(data, cfg):
 
     trend_i = cfg['comp_num']-1
     stream_flow = np.arange(cfg['comp_num'])
-    for c in range(cfg['comp_num']) :
+    for c in range(cfg['comp_num']):
         if cfg['comp']['name'][c] == 'r':
             trend_i = c-1
-    if trend_i == cfg['comp_num'] : 
+    if trend_i == cfg['comp_num']:
         stream_flow = np.concatenate([np.array([trend_i]), np.arange(trend_i)])
     if trend_i == cfg['comp_num']-2 : 
         stream_flow = np.concatenate([np.array([trend_i]), np.arange(trend_i), np.array([cfg['comp_num']-1])])
     if trend_i == 0 : 
         stream_flow = np.array([1,0])
 
-    l1 = np.zeros((cfg['inner_iter'],cfg['comp_num']))
+    l1 = np.zeros((cfg['inner_iter'], cfg['comp_num']))
     stop = 0
-    stop_c = np.zeros((cfg['comp_num'],1))
-    com_old=com_c.copy()
+    stop_c = np.zeros((cfg['comp_num'], 1))
+    com_old = com_c.copy()
 
     # for iter in np.arange(1, 2): # For testing purposes, only runs iter = 1
     for iter in np.arange(cfg['inner_iter']):
 
         if iter + 1 == cfg['inner_iter']:
             stop = 1
-        
+
         # track the convergence
 
         # !!!! CONTINUE HERE, AFTER FINISHING FIRST ITERATION OF FOR LOOP
@@ -243,17 +244,16 @@ def ride_iter(data, cfg):
             #com_old[:,c]=com_c[:,c] # decision of the termination of iteration of each component
         ## CAUTION: for-loop seems unnecessary
 
+        com_old = com_c.copy()
 
-        com_old=com_c.copy()
-
-        for c in stream_flow: 
+        for c in stream_flow:
             if stop_c[c] == 0:
                 temp = data.copy()
                 for j in np.arange(cfg['comp_num']):
                     if j != c:
-                        temp = temp-com_c1[:,:,j]
+                        temp = temp-com_c1[:, :, j]
                 residue = temp.copy()
-                temp = np.empty((length_c[c],d2))
+                temp = np.empty((length_c[c], d2))
                 temp[:] = np.nan
                 for j in np.arange(d2):
                     temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],d1-cfg['comp']['latency'][c][j]+max_latency[c]),j] = residue[:,j]
@@ -276,24 +276,10 @@ def ride_iter(data, cfg):
                 temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
                 temp1[np.isnan(temp)] = np.nan
 
-                # TODO: !!!! IMPORTANT: Next line is only for testing purposes, delete later!! 
-                #temp1[:,44] = np.nan     # # TODO: !!!! IMPORTANT: This line is only for testing purposes, delete later!!            
+                # TODO: !!!! IMPORTANT: Next line is only for testing purposes, delete later!!
+                # temp1[:,44] = np.nan     # # TODO: !!!! IMPORTANT: This line is only for testing purposes, delete later!!
                 temp1 = np.reshape(temp1[~np.isnan(temp1)], (d1, d2))
                 com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1)]
                 com_c1[:,:,c] = temp1
             # End of if-loop
         # End of stream-flow for loop
-
-
-        # TODO: Stream flow loop somehow not working because length_c is longer tham com_c1
-        
-
-        
-
-
-
-
-
-
-
-
