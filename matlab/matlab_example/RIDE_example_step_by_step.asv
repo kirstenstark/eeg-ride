@@ -168,19 +168,18 @@ end
 % figure;set(gcf,'menubar','none');axis([0,100,0.5,1.5]);axis off;temp = get(gcf,'position');set(gcf,'position',[temp(1),temp(2),temp(3),150]);pause(0.001);
 % end
 
-%%
+
 %for section = 1:1  %preparation, down_sampling-----------------------------------------------------------------
     [d1,d2,d3] = size(data);
     epoch_length = d1;
     
     erp = mean(data,3);results.erp = erp;%original ERP
-    
+    %%
     results.latency0 = cfg.comp.latency;%save the original latency information, i.e., RT
 
     %------------down sample data---------------------
     rs = (cfg.re_samp/cfg.samp_interval);
     data = data(round(linspace(1,d1,fix(d1/rs))),:,:);
-   
     
     % %----------only if using specified template to measure C------------
     % if isfield(cfg,'template')
