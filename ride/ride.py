@@ -18,9 +18,11 @@ from scipy.io import loadmat, savemat
 # load exemplary EEG data
 
 mat_file = here('matlab/matlab_example/mat/Vp0001_rep1_close.mat')
-data_dict = loadmat(str(mat_file))
+data_dict = loadmat(str(mat_file), mat_dtype=True)
 data = data_dict['data']
+data = data.astype('float64')
 rt = data_dict['rt']
+rt = rt.astype('float64')
 
 # define cfg file
 cfg = {'samp_interval': 2,
@@ -235,19 +237,31 @@ def ride_iter(data, cfg):
         # !!!! CONTINUE HERE, AFTER FINISHING FIRST ITERATION OF FOR LOOP
         # TO DO: add if-loop for iter > 1
 
-        #if iter > 1: 
-          #  for c in np.arange(cfg['comp_num']):
-           #     l1[iter-2,c]=np.sum()
-                # continue here
+        if iter > 1: 
+            for c in np.arange(cfg['comp_num']):
+                l1[iter-2,c]=np.sum(np.abs(com_c[:,c]) - com_old[:,c])
+                if iter > 2:
+                    if l1[iter-3,c] - l1[iter-2,c] < 0.01*(l1[0,c] - l1[1,c]): # convergence is now defined as 0.01
+                        stop_c[c] = 1
+                    if l1[iter-3,c] == l1[iter-2,c]:
+                        stop_c[c] = 1
+            if cfg['comp_num'] == 1:
+                stop_c[c] = 1
+        for c in np.arange(cfg['comp_num']):
+            com_old[:,c] = com_c[:,c]
+            # decision of the termination of the interation of each component
+            
+
         
         #for c in np.arange(cfg['comp_num']):
             #com_old[:,c]=com_c[:,c] # decision of the termination of iteration of each component
         ## CAUTION: for-loop seems unnecessary
 
-        com_old = com_c.copy()
+        # com_old = com_c.copy()
 
         for c in stream_flow:
             if stop_c[c] == 0:
+                print(iter, stop_c)
                 temp = data.copy()
                 for j in np.arange(cfg['comp_num']):
                     if j != c:
@@ -283,3 +297,48 @@ def ride_iter(data, cfg):
                 com_c1[:,:,c] = temp1
             # End of if-loop
         # End of stream-flow for loop
+
+        
+        # CAUTION: Results are identical for first iteratuion (iter = 0) and c = 1
+        # But after running the whole loop, the resulst differ (because they converge in different iterations)
+        # try next with iter = 0 and c = 0
+        # then try with the next iterations
+
+# CONTINUE HERE ONLY AFTER LOOP IS FIXED       
+# if mean(stop_c) == 1:
+#            stop = 1
+#        if stop == 1:
+#            for c in stream_flow:
+#                temp = data.copy()
+#                for j in np.arange(cfg['comp_num']):
+#                 if j != c:
+#                    temp = temp-com_c1[:,:,j]
+#                residue = temp.copy()
+
+# equivalent matlab code
+#                if stop == 1
+#                      for c = stream_flow
+#                         
+#                         temp = data;
+#                         for j = 1:cfg.comp_num
+#                             if j~=c temp = temp - com_c1(:,:,j);end
+#                             
+#                            % if isfield(cfg,'latency_a') temp = temp - com_ms1;end
+#                             
+#                         end
+#                         
+#                         residue = temp;
+#                         temp = nan(length_c(c),d2);
+#                         for j = 1:d2
+#                             temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
+#                         end
+#                         
+#                         if cfg.final == 1
+#                             temp(isnan(temp))=0;
+# 
+#                                 amp_c(:,c) = mean(com_c(cfg.comp.twd{c}(1):cfg.comp.twd{c}(2),c*ones(1,d2)).*temp(max_latency(c)+[cfg.comp.twd{c}(1):cfg.comp.twd{c}(2)],:));
+# 
+#                         end
+#                         
+#                         
+#                     end
