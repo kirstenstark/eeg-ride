@@ -97,6 +97,7 @@ if trend_i == 1 stream_flow = [2,1];end % !!! this is always the case for S, R
                for c = stream_flow % - loop stops in line 178
                %c = 1; % only if loop is outcommented
                    if stop_c(c) == 0 % - loop stops in line 179
+                        disp(iter)
                         temp = data;
                         for j = 1:cfg.comp_num
                             if j~=c temp = temp - com_c1(:,:,j);end
