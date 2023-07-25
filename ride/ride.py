@@ -287,6 +287,9 @@ def ride_iter(data, cfg):
                     temp0[np.arange(cfg['comp']['twd'][c][0]+ max_latency[c]-1, cfg['comp']['twd'][c][1] + max_latency[c], 
                                     dtype=int)] * RIDE_tukey(cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0] + 1, bd*2)
      
+                # TODO (25.07.): Check why temp1 looks different in Python (regular stripes, the same in each column)
+                # than in MATLAB (stripes are shifted, different in each column). Probably due to differences in
+                # reshaping `temp1` with the logical array in line 298.
                 temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
                 temp1[np.isnan(temp)] = np.nan
 
