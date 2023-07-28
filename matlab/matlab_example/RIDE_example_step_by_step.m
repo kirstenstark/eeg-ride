@@ -272,7 +272,8 @@ end
 
     % if cfg.prg == 1 disp('RIDE decomposition: ');end
     outer_iter = 4;if n_of_c == 0 outer_iter = 1;end%outer iteration is empericaly limited to 4, but if no c component, no need to do outer iteration
-    % for iter = 1:outer_iter # outer iter loop not needed if there is no
+   % for iter = 1:outer_iter % outer iter loop not needed if there is no
+    iter=1;
     % c-component
         
         % %report the progress
@@ -288,7 +289,8 @@ end
         %  end
         % if cfg.prg == 1 fprintf('iteration step for each channel:\n');end
         % for j = 1:n_of_c        latency_i{j}(:,iter) = cfg.comp.latency{c_i(j)};         end
-        % if iter == outer_iter stop=1;end % outcomment?? 
+        
+        if iter == outer_iter stop=1;end % outcomment?? 
        
          %% RIDE! 
        %  for sec_RIDE_inner_iter = 1:1%RIDE_RIDE_RIDE_RIDE_RIDE_RIDE_RIDE_RIDE
