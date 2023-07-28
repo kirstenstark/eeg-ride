@@ -239,7 +239,7 @@ def ride_iter(data, cfg):
 
         if iter > 1: 
             for c in np.arange(cfg['comp_num']):
-                l1[iter-2,c]=np.sum(np.abs(com_c[:,c]) - com_old[:,c])
+                l1[iter-2,c]=np.sum(np.abs(com_c[:,c] - com_old[:,c]))
                 if iter > 2:
                     if l1[iter-3,c] - l1[iter-2,c] < 0.01*(l1[0,c] - l1[1,c]): # convergence is now defined as 0.01
                         stop_c[c] = 1
