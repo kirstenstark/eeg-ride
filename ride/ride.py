@@ -300,47 +300,28 @@ def ride_iter(data, cfg):
             # End of if-loop
         # End of stream-flow for loop
 
-        
-        # CAUTION: Results are identical for first iteratuion (iter = 0) and c = 1
-        # But after running the whole loop, the resulst differ (because they converge in different iterations)
-        # try next with iter = 0 and c = 0
-        # then try with the next iterations
+        if stop_c.mean() == 1:
+            stop = 1
+        if stop == 1:
+            for c in stream_flow:
 
-# CONTINUE HERE ONLY AFTER LOOP IS FIXED       
-# if mean(stop_c) == 1:
-#            stop = 1
-#        if stop == 1:
-#            for c in stream_flow:
-#                temp = data.copy()
-#                for j in np.arange(cfg['comp_num']):
-#                 if j != c:
-#                    temp = temp-com_c1[:,:,j]
-#                residue = temp.copy()
+                temp = data.copy()
+                for j in np.arange(cfg['comp_num']):
+                    if j != c:
+                        temp = temp - com_c1[:,:,j]
 
-# equivalent matlab code
-#                if stop == 1
-#                      for c = stream_flow
-#                         
-#                         temp = data;
-#                         for j = 1:cfg.comp_num
-#                             if j~=c temp = temp - com_c1(:,:,j);end
-#                             
-#                            % if isfield(cfg,'latency_a') temp = temp - com_ms1;end
-#                             
-#                         end
-#                         
-#                         residue = temp;
-#                         temp = nan(length_c(c),d2);
-#                         for j = 1:d2
-#                             temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
-#                         end
-#                         
-#                         if cfg.final == 1
-#                             temp(isnan(temp))=0;
-# 
-#                                 amp_c(:,c) = mean(com_c(cfg.comp.twd{c}(1):cfg.comp.twd{c}(2),c*ones(1,d2)).*temp(max_latency(c)+[cfg.comp.twd{c}(1):cfg.comp.twd{c}(2)],:));
-# 
-#                         end
-#                         
-#                         
-#                     end
+                residue = temp.copy()
+                temp = np.empty((length_c[c], d2))
+                temp[:] = np.nan
+
+                for j in np.arange(d2):
+                    temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],
+                                   d1-cfg['comp']['latency'][c][j]+max_latency[c]),
+                         j] = residue[:,j]
+
+                if cfg['final'] == 1:
+                    temp[np.isnan(temp)] = 0
+                    amp_c[:,c] = np.mean(
+                        np.repeat(com_c[np.arange(cfg["comp"]["twd"][c][0] - 1, cfg["comp"]["twd"][c][1], dtype=int), c, np.newaxis], d2, axis=1) * temp[max_latency[c] + np.arange(cfg["comp"]["twd"][c][0] - 1, cfg["comp"]["twd"][c][1], dtype=int), :], axis=0)
+
+            break
