@@ -181,6 +181,10 @@ def RIDE_tukey(n, r):
 
     return f
 
+def mean_nan(data, dim):
+    data = np.nan_to_num(data)
+    f = np.mean(data, dim)
+    return f
 
 def ride_iter(data, cfg):
 
@@ -286,9 +290,6 @@ def ride_iter(data, cfg):
                     temp0[np.arange(cfg['comp']['twd'][c][0]+ max_latency[c]-1, cfg['comp']['twd'][c][1] + max_latency[c], 
                                     dtype=int)] * RIDE_tukey(cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0] + 1, bd*2)
      
-                # TODO (25.07.): Check why temp1 looks different in Python (regular stripes, the same in each column)
-                # than in MATLAB (stripes are shifted, different in each column). Probably due to differences in
-                # reshaping `temp1` with the logical array in line 298.
                 temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
                 temp1[np.isnan(temp)] = np.nan
 
@@ -325,3 +326,74 @@ def ride_iter(data, cfg):
                         np.repeat(com_c[np.arange(cfg["comp"]["twd"][c][0] - 1, cfg["comp"]["twd"][c][1], dtype=int), c, np.newaxis], d2, axis=1) * temp[max_latency[c] + np.arange(cfg["comp"]["twd"][c][0] - 1, cfg["comp"]["twd"][c][1], dtype=int), :], axis=0)
 
             break
+        # end of inner iter loop
+    
+    # for last iteration
+    if cfg['final'] == 1:
+        # release time window function and detrending
+        # allocate trend to the last C component
+        for c in stream_flow:
+            temp = data0.copy()
+            for j in np.arange(cfg['comp_num']):
+                if j != c:
+                    temp = temp - com_c1[:,:,j]
+                    # TODO: Probably only for microsaccades, temp-com_ms1 if 'ms' and 'var' exist
+            residue = temp.copy()
+            temp = np.empty((length_c[c], d2))
+            temp[:] = np.nan
+
+            for j in np.arange(d2):
+                temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],
+                               d1-cfg['comp']['latency'][c][j]+max_latency[c]),
+                               j] = residue[:,j]
+            temp0 = mean_nan(temp,1)
+
+            if c==stream_flow[0]:
+                temp0[np.arange(cfg['comp']['twd'][c][0] + max_latency[c],dtype=int)]=0.0
+                tem = RIDE_tukey(cfg['comp']['twd'][c][1] - cfg['comp']['twd'][c][0] + 1, bd*2)
+                tem = tem[np.arange(np.fix(len(tem)/2).astype(int))]
+                temp0[np.arange(cfg['comp']['twd'][c][0] + max_latency[c]-1, 
+                                cfg['comp']['twd'][c][0] + max_latency[c] + len(tem)-1, dtype=int)] = \
+                                    temp0[np.arange(cfg['comp']['twd'][c][0] + max_latency[c]-1,\
+                                                    cfg['comp']['twd'][c][0] + max_latency[c] + len(tem)-1, dtype=int)] * tem
+                
+            temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
+            temp1[np.isnan(temp)] = np.nan
+            temp1 = np.reshape(temp1.T[~np.isnan(temp1.T)], (d1, d2), order='F')
+            com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1)]
+            com_c1[:,:,c] = temp1.copy()
+        
+        c = stream_flow[0]
+        temp = data0.copy()
+        for j in np.arange(cfg['comp_num']):
+            if j != c:
+                temp = temp - com_c1[:,:,j]
+                # TODO: Probably only for microsaccades, temp-com_ms1 if 'ms' and 'var' exist
+        residue=temp.copy()
+        temp = np.empty((length_c[c], d2))
+        temp[:] = np.nan
+        for j in np.arange(d2):
+            temp[np.arange(-cfg['comp']['latency'][c][j]+max_latency[c],
+                           d1-cfg['comp']['latency'][c][j]+max_latency[c]),
+                           j] = residue[:,j]
+        temp0 = mean_nan(temp,1)
+        temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
+        temp1[np.isnan(temp)] = np.nan
+        temp1 = np.reshape(temp1.T[~np.isnan(temp1.T)], (d1, d2), order='F')
+        com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1)]
+        com_c1[:,:,c] = temp1.copy()
+
+    # end of last iteration
+    results={}
+    results['amp'] = amp_c
+    results['comp'] = com_c
+    results['comp1'] = np.mean(com_c1,1)
+    results['iter'] = iter
+    results['l1'] = l1
+    results['trend_c'] = stream_flow[0]
+
+    return results
+
+
+## TODO : Test stream_flow loop of last iteration and full ride_iter function
+## Caution: Electrode and cfg1 are hard coded for now 
