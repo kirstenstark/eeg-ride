@@ -1,6 +1,7 @@
 import numpy as np
 from pyprojroot.here import here
 from scipy.fft import fft, ifft
+from scipy.interpolate import CubicSpline
 from scipy.io import loadmat, savemat
 
 # import matplotlib.pyplot as plt # for plotting
@@ -34,6 +35,8 @@ cfg['comp_num'] = len(cfg['comp']['name'])
 cfg['rwd'] = 200
 cfg['re_samp'] = cfg['samp_interval']
 cfg['bd'] = 0.2  # Alpha value for Tukey window
+cfg['prg'] = 1  # Print progress to console
+cfg['bl'] = 200  # Baseline length
 
 # start RIDE correction
 assert len(cfg['comp']['name']) > 1, 'At least two components are required'
@@ -87,11 +90,7 @@ cfg1['final'] = stop
 cfg1['inner_iter'] = 100
 
 c_l = np.zeros((d1, cfg['comp_num'], d2))
-c_sl = c_l
-
-# for c in range(d2):
-#     rst = ride_iter(np.squeeze(data[:, c, :]), cfg1)
-
+c_sl = c_l.copy()
 
 def filtering20(x, a, b):
 
@@ -188,10 +187,9 @@ def mean_nan(data, dim):
 
 def ride_iter(data, cfg):
 
-    # These are the inputs that get passed to the function
-    # Remove these two lines once the function is complete!
-    cfg = cfg1
-    data = data[:, 61, :]
+    # # For debugging
+    # cfg = cfg1
+    # data = data[:, 61, :]
 
     d1, d2 = data.shape
     bd = cfg['bd']
@@ -394,6 +392,116 @@ def ride_iter(data, cfg):
 
     return results
 
+amp = np.zeros((d3, d2, cfg['comp_num']))
+for c in range(d2):
 
-## TODO : Test stream_flow loop of last iteration and full ride_iter function
-## Caution: Electrode and cfg1 are hard coded for now 
+    if cfg['prg'] == 1:
+        print(f'Processing electrode #{c}')
+
+    rst = ride_iter(np.squeeze(data[:, c, :]), cfg1)
+
+    c_l[:, :, c] = rst['comp']
+    c_sl[:, :, c] = rst['comp1']
+
+    if stop == 1:
+        amp[:, c, :] = rst['amp']
+    
+    if cfg['prg'] == 1:
+        print(f'Took {rst["iter"] + 1} iterations')
+
+comp = c_l.transpose((0, 2, 1))
+comp1 = c_sl.transpose((0, 2, 1))
+
+results['erp_new'] = 0
+results['residue'] = erp
+
+bl_wd = np.arange(-cfg['epoch_twd'][0]/cfg['samp_interval'],
+                  -cfg['epoch_twd'][0]/cfg['samp_interval']+cfg['bl']/cfg['samp_interval'],
+                  dtype=int)
+
+
+def interp2d(data, x1, x2):
+
+    temp = np.empty((len(x2), data.shape[1]))
+
+    for j in np.arange(data.shape[1]):
+        cs = CubicSpline(x1, data[:, j], axis=0)
+        temp[:, j] = cs(x2)
+    
+    return temp
+
+component = np.empty((d1, d2, cfg['comp_num']))
+for j in np.arange(cfg['comp_num']):
+    # The MATLAB version explicitly requests "spline" as the interpolation method
+    # Our Python function `interp2d` only performs this spline interpolation,
+    # with no support for any other method (unlike the MATLAB function)
+    component[:, : , j] = interp2d(comp[:, :, j],
+                                   np.round(np.linspace(0, epoch_length, d1, endpoint=False)),
+                                   np.arange(0, epoch_length))
+
+# % % for section = 1:1%%%%%final data%%%%
+# % % 
+# % %     %if data has been down sampled, apply interpolation to restore the
+# % %     %original resolution
+# % %     
+# % %     %and re-baselining
+# % %     results.erp_new = 0;
+# % %     results.residue = erp;
+# % %     % if isfield(cfg,'latency_a') %only for microsaccades
+# % %     %     results.ms = baseline(interp2d(comp_ms,round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'));
+# % %     %     results.ms_sl = baseline(interp2d(comp_ms1,round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'));
+# % %     % end
+# % %     bl_wd = fix(-cfg.epoch_twd(1)/cfg.samp_interval)+1:fix(-cfg.epoch_twd(1)/cfg.samp_interval+cfg.bl/cfg.samp_interval);%baseline time window
+# % %     for j = 1:cfg.comp_num
+# % %         component(:,:,j) = interp2d(comp(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'); % !!! only relevant if data has been downsampled
+# TODO: CONTINUE HERE
+# % %         component(:,:,j) = baseline(component(:,:,j),bl_wd);
+# % %         component1(:,:,j) = interp2d(comp1(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline');
+# % %         component1(:,:,j) = baseline(component1(:,:,j),bl_wd);
+# % %         results.residue = results.residue - component1(:,:,j);
+# % %         eval(['results.',cfg.comp.name{j},' = component(:,:,j);']);
+# % %         eval(['results.',cfg.comp.name{j},'_sl = component1(:,:,j);']);
+# % %         eval(['results.latency_',cfg.comp.name{j},' = cfg.comp.latency{j}*cfg.re_samp;']);
+# % %         eval(['results.amp_',cfg.comp.name{j},'=amp(:,:,j);']);
+# % %     end
+# % %     
+# % %     % if isfield(cfg,'latency_a') %only for microsaccades
+# % %     %     results.residue = results.residue - results.ms_sl;
+# % %     % end
+# % %     
+# % %     eval(['results.',cfg.comp.name{1},' = baseline(results.',...
+# % %         cfg.comp.name{1},' ,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']); % !!! Un-does baseline correction by adding basline window from ERPs
+# % %     eval(['results.',cfg.comp.name{1},'_sl = baseline(results.',...
+# % %         cfg.comp.name{1},'_sl,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
+# % % % %     
+# % % 
+# % %     eval(['results.',cfg.comp.name{rst.trend_c},' = baseline(results.',...
+# % %         cfg.comp.name{rst.trend_c},' + results.residue,bl_wd);']);
+# % %     eval(['results.',cfg.comp.name{rst.trend_c},'_sl = baseline(results.',...
+# % %         cfg.comp.name{rst.trend_c},'_sl + results.residue,bl_wd);']);
+# % %     
+# % %     if cfg.comp_num == 1 
+# % %         bl_wd = 1:-fix(cfg.epoch_twd(1)/cfg.samp_interval);
+# % %         eval(['results.',cfg.comp.name{1},' = baseline(results.',...
+# % %         cfg.comp.name{1},' + results.residue,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
+# % %         eval(['results.',cfg.comp.name{1},'_sl = baseline(results.',...
+# % %             cfg.comp.name{1},'_sl + results.residue,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
+# % %     end
+# % %     for j = 1:cfg.comp_num eval(['results.erp_new = results.erp_new + results.',cfg.comp.name{j},';']);end
+# % %     % if n_of_c~=0 results.latency_i = latency_i;results.no_p = no_p;end
+# % %     results.cfg = cfg0;
+# % % %     results.cfg1 = cfg;
+# % % %     results.l1 = l1;
+# % %     % if exist('corr_i','var') results.corr_i = corr_i;end
+# % % 
+# % % 
+# % % 
+# % %     
+# % %     
+# % % 
+# % % end
+# % 
+# % 
+# % 
+# %     
+# %     
