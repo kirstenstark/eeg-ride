@@ -261,127 +261,127 @@ for iter = 1:cfg.inner_iter % !!! always 1:100 -> for loops ends around line 260
     end % END of ITER LOOP (Line 67)
     
   %% 
-%             
-%             
-%             for last_iter = 1:1
-%                 
-%                 if cfg.final == 1
-%                     for ongoing = 1:1 %release time window function and detrending
-%                         %allocate trend to the last C component
-%                          for c = stream_flow
-%                                 temp = data0;
-%                                 for j = 1:cfg.comp_num
-%                                     if j~=c temp = temp - com_c1(:,:,j);end
-%                                     if exist('ms','var') temp = temp - com_ms1;end % !!! probably only for microsaccades
-%                                 end
-% 
-% 
-%                                     residue = temp;
-%                                     temp = nan(length_c(c),d2);
-%                                     for j = 1:d2
-%                                         temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
-%                                     end
-%                                     
-%                                     
-% 
-%                                 temp0 = mean_nan(temp,2);
-%                                 
-%                                 if c==stream_flow(1)
-%                                     temp0([1:cfg.comp.twd{c}(1)+max_latency(c)])=0;
-%                                     tem = RIDE_tukey(cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1)+1,bd*2);tem = tem(1:fix(end/2));
-%                                     temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(1)+max_latency(c))+length(tem)-1)=...
-%                                         temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(1)+max_latency(c))+length(tem)-1).*tem;
-%                                 end
-%                                 
-%                                 temp1 = temp0(:,ones(1,d2));
-%                                 temp1(isnan(temp)) = nan;
-%                                 temp1 = (reshape(temp1(~isnan(temp1)),d1,d2));
-%                                 com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
-%                                 com_c1(:,:,c) = temp1;
-% 
-%                          end
-%                          
-%                         %  for e = 1:fix(isfield(cfg,'latency_a'))
-%                         %      temp = data0;
-%                         %      for j = 1:cfg.comp_num
-%                         %          temp = temp - com_c1(:,:,j);
-%                         %      end
-%                              
-%                         %      temp = temp - com_ms1;
-%                              
-%                              
-%                              
-%                         %      residue = temp;
-%                         %      temp = nan(length_ms,d_ms);l=0;
-%                         %      for j = 1:d2
-%                         %          for jj = 1:length(find(~isnan(ms(:,j))))
-%                         %              l = l+1;
-%                         %              temp(1-ms(jj,j)+max_latency_ms:d1-ms(jj,j)+max_latency_ms,l) = residue(:,j);
-%                         %          end
-%                         %      end
-%                              
-%                              
-%                              
-%                              
-%                         %      temp0 = mean_nan(temp,2);
-%                         %      temp0(max_latency_ms+1:max_latency_ms+d1) = temp0(max_latency_ms+1:max_latency_ms+d1) + com_ms;
-%                              
-%                         %      temp1 = zeros(d1,d2);
-%                         %      for j = 1:d2
-%                         %          for jj = 1:length(find(~isnan(ms(:,j))))
-%                         %              temp1(:,j) = temp1(:,j)+temp0(1-ms(jj,j)+max_latency_ms:d1-ms(jj,j)+max_latency_ms);
-%                         %          end
-%                         %      end
-%                         %      com_ms = temp0(max_latency_ms+1:max_latency_ms+d1);
-%                         %      com_ms1(:,:) = temp1;
-%                         %  end
-% %                          if cfg.channel == 32  figure;imagesc(com_ms1);figure;plot(mean(com_ms1,2));hold on;plot(com_ms,'r');end
-%                          for c = stream_flow(1)
-%                                 temp = data0;
-%                                 for j = 1:cfg.comp_num
-%                                     if j~=c temp = temp - com_c1(:,:,j);end
-%                                     %  if exist('ms','var') temp = temp - com_ms1;end
-%                                 end
-% 
-% 
-%                                     residue = temp;
-%                                     temp = nan(length_c(c),d2);
-%                                     for j = 1:d2
-%                                         temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
-%                                     end
-%                                     
-%                                     % !!! Here we don't apply the tukey window apparently
-% 
-%                                 temp0 = mean_nan(temp,2);                                
-%                                 temp1 = temp0(:,ones(1,d2));
-%                                 temp1(isnan(temp)) = nan;
-%                                 temp1 = (reshape(temp1(~isnan(temp1)),d1,d2));
-%                                 com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
-%                                 com_c1(:,:,c) = temp1;
-% 
-%                          end
-%                          
-%                          
-% 
-%                     end
-%                 end
-%                 
-% 
-%             end
-%             
-%             
-%   
-%             
-% 
-%             % if exist('ms','var') results.comp_ms = com_ms;results.comp_ms1 = mean(com_ms1,2);end
-%             results.amp = amp_c;
-%             results.comp = com_c;
-%             results.comp1 = permute(mean(com_c1,2),[1,3,2]);
-%             results.iter = iter;
-%             results.l1 = l1;
-%             results.trend_c = stream_flow(1);
-%             
-% 
-% %end
+            
+            
+            for last_iter = 1:1
+                
+                if cfg.final == 1
+                    for ongoing = 1:1 %release time window function and detrending
+                        %allocate trend to the last C component
+                         for c = stream_flow
+                                temp = data0;
+                                for j = 1:cfg.comp_num
+                                    if j~=c temp = temp - com_c1(:,:,j);end
+                                    if exist('ms','var') temp = temp - com_ms1;end % !!! probably only for microsaccades
+                                end
+
+
+                                    residue = temp;
+                                    temp = nan(length_c(c),d2);
+                                    for j = 1:d2
+                                        temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
+                                    end
+                                    
+                                    
+
+                                temp0 = mean_nan(temp,2);
+                                
+                                if c==stream_flow(1)
+                                    temp0([1:cfg.comp.twd{c}(1)+max_latency(c)])=0;
+                                    tem = RIDE_tukey(cfg.comp.twd{c}(2)-cfg.comp.twd{c}(1)+1,bd*2);tem = tem(1:fix(end/2));
+                                    temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(1)+max_latency(c))+length(tem)-1)=...
+                                        temp0((cfg.comp.twd{c}(1)+max_latency(c)):(cfg.comp.twd{c}(1)+max_latency(c))+length(tem)-1).*tem;
+                                end
+                                
+                                temp1 = temp0(:,ones(1,d2));
+                                temp1(isnan(temp)) = nan;
+                                temp1 = (reshape(temp1(~isnan(temp1)),d1,d2));
+                                com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
+                                com_c1(:,:,c) = temp1;
+
+                         end
+                         
+                        %  for e = 1:fix(isfield(cfg,'latency_a'))
+                        %      temp = data0;
+                        %      for j = 1:cfg.comp_num
+                        %          temp = temp - com_c1(:,:,j);
+                        %      end
+                             
+                        %      temp = temp - com_ms1;
+                             
+                             
+                             
+                        %      residue = temp;
+                        %      temp = nan(length_ms,d_ms);l=0;
+                        %      for j = 1:d2
+                        %          for jj = 1:length(find(~isnan(ms(:,j))))
+                        %              l = l+1;
+                        %              temp(1-ms(jj,j)+max_latency_ms:d1-ms(jj,j)+max_latency_ms,l) = residue(:,j);
+                        %          end
+                        %      end
+                             
+                             
+                             
+                             
+                        %      temp0 = mean_nan(temp,2);
+                        %      temp0(max_latency_ms+1:max_latency_ms+d1) = temp0(max_latency_ms+1:max_latency_ms+d1) + com_ms;
+                             
+                        %      temp1 = zeros(d1,d2);
+                        %      for j = 1:d2
+                        %          for jj = 1:length(find(~isnan(ms(:,j))))
+                        %              temp1(:,j) = temp1(:,j)+temp0(1-ms(jj,j)+max_latency_ms:d1-ms(jj,j)+max_latency_ms);
+                        %          end
+                        %      end
+                        %      com_ms = temp0(max_latency_ms+1:max_latency_ms+d1);
+                        %      com_ms1(:,:) = temp1;
+                        %  end
+%                          if cfg.channel == 32  figure;imagesc(com_ms1);figure;plot(mean(com_ms1,2));hold on;plot(com_ms,'r');end
+                         for c = stream_flow(1)
+                                temp = data0;
+                                for j = 1:cfg.comp_num
+                                    if j~=c temp = temp - com_c1(:,:,j);end
+                                    %  if exist('ms','var') temp = temp - com_ms1;end
+                                end
+
+
+                                    residue = temp;
+                                    temp = nan(length_c(c),d2);
+                                    for j = 1:d2
+                                        temp(1-cfg.comp.latency{c}(j)+max_latency(c):d1-cfg.comp.latency{c}(j)+max_latency(c),j) = residue(:,j);
+                                    end
+                                    
+                                    % !!! Here we don't apply the tukey window apparently
+
+                                temp0 = mean_nan(temp,2);                                
+                                temp1 = temp0(:,ones(1,d2));
+                                temp1(isnan(temp)) = nan;
+                                temp1 = (reshape(temp1(~isnan(temp1)),d1,d2));
+                                com_c(:,c) = temp0(max_latency(c)+1:max_latency(c)+d1);
+                                com_c1(:,:,c) = temp1;
+
+                         end
+                         
+                         
+
+                    end
+                end
+                
+
+            end
+            
+            
+  
+            
+
+            % if exist('ms','var') results.comp_ms = com_ms;results.comp_ms1 = mean(com_ms1,2);end
+            results.amp = amp_c;
+            results.comp = com_c;
+            results.comp1 = permute(mean(com_c1,2),[1,3,2]);
+            results.iter = iter;
+            results.l1 = l1;
+            results.trend_c = stream_flow(1);
+            
+
+%end
 
 
