@@ -3,10 +3,10 @@
 
 
 %% OUTCOMMENT IF RITER_iter- function is used
-       c = 62;
-       data =  squeeze(data(:,c,:));
-       cfg = cfg1;
-       j = 1;
+%        c = 62;
+%        data =  squeeze(data(:,c,:));
+%        cfg = cfg1;
+%        j = 1;
 
 
 %% Start of ride iter function
