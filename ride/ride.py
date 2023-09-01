@@ -68,7 +68,7 @@ for j in range(cfg['comp_num']):
     if isinstance(cfg['comp']['latency'][j], int):
         int_value = cfg['comp']['latency'][j]
         print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
-        cfg['comp']['latency'][j] = np.array([int_value] * d3)
+        cfg['comp']['latency'][j] = np.array([[int_value]] * d3)
 
     if cfg['comp']['name'][j] == 'r':
         cfg['comp']['twd'][j] = cfg['comp']['twd'][j] + np.median(results['latency0'][j])
@@ -392,6 +392,30 @@ def ride_iter(data, cfg):
 
     return results
 
+def interp2d(data, x1, x2):
+
+    temp = np.empty((len(x2), data.shape[1]))
+
+    for j in np.arange(data.shape[1]):
+        cs = CubicSpline(x1, data[:, j], axis=0)
+        temp[:, j] = cs(x2)
+    
+    return temp
+
+def baseline(x, a=None):
+
+    x[np.isnan(x)] = 0.0
+
+    if a is None:
+        temp = np.mean(x, axis=0)
+        f = x - temp[np.newaxis, :]
+    else:
+        temp = np.mean(x[a, :], axis=0)
+        f = x - temp[np.newaxis, :]
+
+    return f
+
+
 amp = np.zeros((d3, d2, cfg['comp_num']))
 for c in range(d2):
 
@@ -420,17 +444,9 @@ bl_wd = np.arange(-cfg['epoch_twd'][0]/cfg['samp_interval'],
                   dtype=int)
 
 
-def interp2d(data, x1, x2):
+component = np.zeros((d1, d2, cfg['comp_num']))
+component1 = np.zeros((d1, d2, cfg['comp_num']))
 
-    temp = np.empty((len(x2), data.shape[1]))
-
-    for j in np.arange(data.shape[1]):
-        cs = CubicSpline(x1, data[:, j], axis=0)
-        temp[:, j] = cs(x2)
-    
-    return temp
-
-component = np.empty((d1, d2, cfg['comp_num']))
 for j in np.arange(cfg['comp_num']):
     # The MATLAB version explicitly requests "spline" as the interpolation method
     # Our Python function `interp2d` only performs this spline interpolation,
@@ -438,70 +454,29 @@ for j in np.arange(cfg['comp_num']):
     component[:, : , j] = interp2d(comp[:, :, j],
                                    np.round(np.linspace(0, epoch_length, d1, endpoint=False)),
                                    np.arange(0, epoch_length))
+    component[:, :, j] = baseline(component[:, :, j],bl_wd)
+    component1[:, :, j] = interp2d(comp1[:, :, j],
+                                    np.round(np.linspace(0, epoch_length, d1, endpoint=False)),
+                                    np.arange(0, epoch_length))
+    component1[:, :, j] = baseline(component1[:, :, j],bl_wd)
+    results['residue'] = results['residue'] - component1[:, :, j]
+    results[cfg['comp']['name'][j]] = component[:, :, j]
+    results[cfg['comp']['name'][j]+'_sl'] = component1[:, :, j]
+    results['latency_'+cfg['comp']['name'][j]] = cfg['comp']['latency'][j]*cfg['re_samp']
+    results['amp_'+cfg['comp']['name'][j]] = amp[:, :, j]
 
-# % % for section = 1:1%%%%%final data%%%%
-# % % 
-# % %     %if data has been down sampled, apply interpolation to restore the
-# % %     %original resolution
-# % %     
-# % %     %and re-baselining
-# % %     results.erp_new = 0;
-# % %     results.residue = erp;
-# % %     % if isfield(cfg,'latency_a') %only for microsaccades
-# % %     %     results.ms = baseline(interp2d(comp_ms,round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'));
-# % %     %     results.ms_sl = baseline(interp2d(comp_ms1,round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'));
-# % %     % end
-# % %     bl_wd = fix(-cfg.epoch_twd(1)/cfg.samp_interval)+1:fix(-cfg.epoch_twd(1)/cfg.samp_interval+cfg.bl/cfg.samp_interval);%baseline time window
-# % %     for j = 1:cfg.comp_num
-# % %         component(:,:,j) = interp2d(comp(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'); % !!! only relevant if data has been downsampled
-# TODO: CONTINUE HERE
-# % %         component(:,:,j) = baseline(component(:,:,j),bl_wd);
-# % %         component1(:,:,j) = interp2d(comp1(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline');
-# % %         component1(:,:,j) = baseline(component1(:,:,j),bl_wd);
-# % %         results.residue = results.residue - component1(:,:,j);
-# % %         eval(['results.',cfg.comp.name{j},' = component(:,:,j);']);
-# % %         eval(['results.',cfg.comp.name{j},'_sl = component1(:,:,j);']);
-# % %         eval(['results.latency_',cfg.comp.name{j},' = cfg.comp.latency{j}*cfg.re_samp;']);
-# % %         eval(['results.amp_',cfg.comp.name{j},'=amp(:,:,j);']);
-# % %     end
-# % %     
-# % %     % if isfield(cfg,'latency_a') %only for microsaccades
-# % %     %     results.residue = results.residue - results.ms_sl;
-# % %     % end
-# % %     
-# % %     eval(['results.',cfg.comp.name{1},' = baseline(results.',...
-# % %         cfg.comp.name{1},' ,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']); % !!! Un-does baseline correction by adding basline window from ERPs
-# % %     eval(['results.',cfg.comp.name{1},'_sl = baseline(results.',...
-# % %         cfg.comp.name{1},'_sl,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
-# % % % %     
-# % % 
-# % %     eval(['results.',cfg.comp.name{rst.trend_c},' = baseline(results.',...
-# % %         cfg.comp.name{rst.trend_c},' + results.residue,bl_wd);']);
-# % %     eval(['results.',cfg.comp.name{rst.trend_c},'_sl = baseline(results.',...
-# % %         cfg.comp.name{rst.trend_c},'_sl + results.residue,bl_wd);']);
-# % %     
-# % %     if cfg.comp_num == 1 
-# % %         bl_wd = 1:-fix(cfg.epoch_twd(1)/cfg.samp_interval);
-# % %         eval(['results.',cfg.comp.name{1},' = baseline(results.',...
-# % %         cfg.comp.name{1},' + results.residue,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
-# % %         eval(['results.',cfg.comp.name{1},'_sl = baseline(results.',...
-# % %             cfg.comp.name{1},'_sl + results.residue,bl_wd) + repmat(mean(erp(bl_wd,:)),[epoch_length,1]);']);
-# % %     end
-# % %     for j = 1:cfg.comp_num eval(['results.erp_new = results.erp_new + results.',cfg.comp.name{j},';']);end
-# % %     % if n_of_c~=0 results.latency_i = latency_i;results.no_p = no_p;end
-# % %     results.cfg = cfg0;
-# % % %     results.cfg1 = cfg;
-# % % %     results.l1 = l1;
-# % %     % if exist('corr_i','var') results.corr_i = corr_i;end
-# % % 
-# % % 
-# % % 
-# % %     
-# % %     
-# % % 
-# % % end
-# % 
-# % 
-# % 
-# %     
-# %     
+results[cfg['comp']['name'][0]] = baseline(results[cfg['comp']['name'][0]],bl_wd) + np.repeat(np.mean(erp[bl_wd, :], axis=0)[np.newaxis, :], epoch_length, axis=0)
+results[cfg['comp']['name'][0]+'_sl']= baseline(results[cfg['comp']['name'][0]+'_sl'],bl_wd) + np.repeat(np.mean(erp[bl_wd, :], axis=0)[np.newaxis, :], epoch_length, axis=0)
+
+results[cfg['comp']['name'][rst['trend_c']]] = baseline(results[cfg['comp']['name'][rst['trend_c']]] + results['residue'],bl_wd)
+results[cfg['comp']['name'][rst['trend_c']]+'_sl'] = baseline(results[cfg['comp']['name'][rst['trend_c']]+'_sl'] + results['residue'],bl_wd)
+
+if  cfg['comp_num'] == 1:
+    bl_wd = np.arange(-cfg['epoch_twd'][0]/cfg['samp_interval'], dtype='int')
+    results[cfg['comp']['name'][0]] = baseline(results[cfg['comp']['name'][0]] + results['residue'],bl_wd) + np.repeat(np.mean(erp[bl_wd, :], axis=0)[np.newaxis, :], epoch_length, axis=0)
+    results[cfg['comp']['name'][0]+'_sl'] = baseline(results[cfg['comp']['name'][0]+'_sl'] + results['residue'],bl_wd) + np.repeat(np.mean(erp[bl_wd, :], axis=0)[np.newaxis, :], epoch_length, axis=0)
+
+for j in np.arange(cfg['comp_num']):
+    results['erp_new'] = results['erp_new'] + results[cfg['comp']['name'][j]]
+
+results['cfg'] = cfg0.copy()
