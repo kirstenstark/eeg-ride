@@ -29,7 +29,9 @@ if __name__ == "__main__":
         ],
         packages=find_packages(),
         install_requires=[
-            'numpy'
+            'matplotlib',
+            'numpy',
+            'scipy'
         ],
         python_requires='>=3.8',
     )
