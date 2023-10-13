@@ -1,3 +1,5 @@
+from warnings import warn
+
 import numpy as np
 
 
@@ -24,6 +26,9 @@ class RideCfg:
 
         if epoch_twd is None:
             epoch_twd = np.array([-100, 1198])
+            if epoch_twd[1] < 1000:
+                warn('`epoch_twd` is less than 1000 ms post stimulus onset ' +
+                     'and therefore probably to short for RIDE correction.')
 
         self.comp_name = comp_name
         self.comp_twd = comp_twd
