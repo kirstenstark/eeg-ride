@@ -1,4 +1,5 @@
 import numpy as np
+from mne import Epochs
 
 from .baseline import baseline
 from .helpers import round_like_matlab
@@ -24,6 +25,10 @@ def ride_call(data, cfg):
     # TODO: make sure order is always s, (c), r
 
     cfg0 = cfg.copy()
+
+    # If necessary, extract Numpy arra from MNE epochs object
+    if isinstance(data, Epochs):
+        data = data.get_data()
 
     # section 1
     d1, d2, d3 = data.shape
