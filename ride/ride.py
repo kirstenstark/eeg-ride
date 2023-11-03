@@ -73,7 +73,7 @@ def ride_call(data, cfg):
     for c in range(d2):
 
         if cfg.prg == 1:
-            print(f'Processing electrode #{c}')
+            print(f'Processing electrode #{c + 1}')
 
         rst = ride_iter(np.squeeze(data[:, c, :]), cfg1)
 
