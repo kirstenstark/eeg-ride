@@ -29,6 +29,7 @@ def ride_call(data, cfg):
     # If necessary, extract Numpy arra from MNE epochs object
     if isinstance(data, Epochs):
         data = data.get_data()
+        data = np.swapaxes(data, 0, 2)
 
     # section 1
     d1, d2, d3 = data.shape
