@@ -15,7 +15,8 @@ class RideCfg:
                  re_samp=2,
                  bd=0.2,
                  prg=1,
-                 bl=200):
+                 bl=200,
+                 comp_twd_samp=None):
 
         assert len(comp_name) == len(comp_twd) == len(comp_latency), \
             '`comp_name`, `comp_twd`, and `comp_latency` must have the same length'
@@ -30,6 +31,9 @@ class RideCfg:
                 warn('`epoch_twd` is less than 1000 ms post stimulus onset ' +
                      'and therefore probably to short for RIDE correction.')
 
+        if comp_twd_samp is None:
+            comp_twd_samp = comp_twd.copy()
+
         self.comp_name = comp_name
         self.comp_twd = comp_twd
         self.comp_latency = comp_latency
@@ -42,7 +46,7 @@ class RideCfg:
         self.bd = bd
         self.prg = prg
         self.bl = bl
-
+        self.comp_twd_samp = comp_twd_samp
 
     def copy(self):
 
@@ -55,4 +59,5 @@ class RideCfg:
                        re_samp=self.re_samp,
                        bd=self.bd,
                        prg=self.prg,
-                       bl=self.bl)
+                       bl=self.bl,
+                       comp_twd_samp=self.comp_twd_samp)

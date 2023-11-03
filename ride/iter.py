@@ -98,17 +98,17 @@ def ride_iter(data, cfg):
                 temp = ride_detrend(
                     temp,
                     np.array([0,
-                              np.fix((cfg.comp_twd[c][1] - cfg.comp_twd[c][0]) * bd),
-                              np.fix((cfg.comp_twd[c][1] - cfg.comp_twd[c][0]) * (1 - bd)) - 1,
-                              cfg.comp_twd[c][1] - cfg.comp_twd[c][0] - 1], dtype=int) \
-                                + max_latency[c] + int(cfg.comp_twd[c][0]))
+                              np.fix((cfg.comp_twd_samp[c][1] - cfg.comp_twd_samp[c][0]) * bd),
+                              np.fix((cfg.comp_twd_samp[c][1] - cfg.comp_twd_samp[c][0]) * (1 - bd)) - 1,
+                              cfg.comp_twd_samp[c][1] - cfg.comp_twd_samp[c][0] - 1], dtype=int) \
+                                + max_latency[c] + int(cfg.comp_twd_samp[c][0]))
                 
                 temp0 = median_2d(temp.T)
-                temp0[np.concatenate([np.arange(cfg.comp_twd[c][0], dtype=int) + max_latency[c],
-                                      np.arange(cfg.comp_twd[c][1] + max_latency[c]-1, length_c[c], dtype=int)])]=0
-                temp0[np.arange(cfg.comp_twd[c][0]+ max_latency[c]-1, cfg.comp_twd[c][1] + max_latency[c], dtype=int)] = \
-                    temp0[np.arange(cfg.comp_twd[c][0]+ max_latency[c]-1, cfg.comp_twd[c][1] + max_latency[c], 
-                                    dtype=int)] * ride_tukey(cfg.comp_twd[c][1] - cfg.comp_twd[c][0] + 1, bd*2)
+                temp0[np.concatenate([np.arange(cfg.comp_twd_samp[c][0], dtype=int) + max_latency[c],
+                                      np.arange(cfg.comp_twd_samp[c][1] + max_latency[c]-1, length_c[c], dtype=int)])]=0
+                temp0[np.arange(cfg.comp_twd_samp[c][0]+ max_latency[c]-1, cfg.comp_twd_samp[c][1] + max_latency[c], dtype=int)] = \
+                    temp0[np.arange(cfg.comp_twd_samp[c][0]+ max_latency[c]-1, cfg.comp_twd_samp[c][1] + max_latency[c], 
+                                    dtype=int)] * ride_tukey(cfg.comp_twd_samp[c][1] - cfg.comp_twd_samp[c][0] + 1, bd*2)
      
                 temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
                 temp1[np.isnan(temp)] = np.nan
@@ -143,7 +143,7 @@ def ride_iter(data, cfg):
                 if cfg.final == 1:
                     temp[np.isnan(temp)] = 0
                     amp_c[:,c] = np.mean(
-                        np.repeat(com_c[np.arange(cfg.comp_twd[c][0] - 1, cfg.comp_twd[c][1], dtype=int), c, np.newaxis], d2, axis=1) * temp[max_latency[c] + np.arange(cfg.comp_twd[c][0] - 1, cfg.comp_twd[c][1], dtype=int), :], axis=0)
+                        np.repeat(com_c[np.arange(cfg.comp_twd_samp[c][0] - 1, cfg.comp_twd_samp[c][1], dtype=int), c, np.newaxis], d2, axis=1) * temp[max_latency[c] + np.arange(cfg.comp_twd_samp[c][0] - 1, cfg.comp_twd_samp[c][1], dtype=int), :], axis=0)
 
             break
         # end of inner iter loop
@@ -169,13 +169,13 @@ def ride_iter(data, cfg):
             temp0 = mean_nan(temp,1)
 
             if c==stream_flow[0]:
-                temp0[np.arange(cfg.comp_twd[c][0] + max_latency[c],dtype=int)]=0.0
-                tem = ride_tukey(cfg.comp_twd[c][1] - cfg.comp_twd[c][0] + 1, bd*2)
+                temp0[np.arange(cfg.comp_twd_samp[c][0] + max_latency[c],dtype=int)]=0.0
+                tem = ride_tukey(cfg.comp_twd_samp[c][1] - cfg.comp_twd_samp[c][0] + 1, bd*2)
                 tem = tem[np.arange(np.fix(len(tem)/2).astype(int))]
-                temp0[np.arange(cfg.comp_twd[c][0] + max_latency[c]-1, 
-                                cfg.comp_twd[c][0] + max_latency[c] + len(tem)-1, dtype=int)] = \
-                                    temp0[np.arange(cfg.comp_twd[c][0] + max_latency[c]-1,\
-                                                    cfg.comp_twd[c][0] + max_latency[c] + len(tem)-1, dtype=int)] * tem
+                temp0[np.arange(cfg.comp_twd_samp[c][0] + max_latency[c]-1, 
+                                cfg.comp_twd_samp[c][0] + max_latency[c] + len(tem)-1, dtype=int)] = \
+                                    temp0[np.arange(cfg.comp_twd_samp[c][0] + max_latency[c]-1,\
+                                                    cfg.comp_twd_samp[c][0] + max_latency[c] + len(tem)-1, dtype=int)] * tem
                 
             temp1 = np.repeat(temp0[:,np.newaxis],d2, axis=1)
             temp1[np.isnan(temp)] = np.nan

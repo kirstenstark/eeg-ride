@@ -7,7 +7,6 @@ from .interp2d import interp2d
 from .iter import ride_iter
 from .results import RideResults
 
-
 def ride_call(data, cfg):
 
     # # Load example data
@@ -49,14 +48,14 @@ def ride_call(data, cfg):
             cfg.comp_latency[j] = np.array([[int_value]] * d3)
 
         if cfg.comp_name[j] == 'r':
-            cfg.comp_twd[j] = cfg.comp_twd[j] + np.median(results.latency0[j])
-            cfg.comp_twd[j][cfg.comp_twd[j] < cfg.rwd] = cfg.rwd
-            cfg.comp_twd[j][cfg.comp_twd[j] > cfg.epoch_twd[1]] = cfg.epoch_twd[1]
+            cfg.comp_twd_samp[j] = cfg.comp_twd_samp[j] + np.median(results.latency0[j])
+            cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] < cfg.rwd] = cfg.rwd
+            cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] > cfg.epoch_twd[1]] = cfg.epoch_twd[1]
 
         cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
         cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j])) 
 
-        cfg.comp_twd[j] = np.fix((cfg.comp_twd[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]
+        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]
 
     stop = 1
 
