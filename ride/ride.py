@@ -1,3 +1,5 @@
+from warnings import warn
+
 import numpy as np
 from mne import Epochs
 
@@ -27,7 +29,7 @@ def ride_call(data, cfg):
 
     # If necessary, extract Numpy arra from MNE epochs object
     if isinstance(data, Epochs):
-        data = data.get_data()
+        data = data.get_data(picks='eeg')
         data = np.swapaxes(data, 0, 2)
 
     # section 1

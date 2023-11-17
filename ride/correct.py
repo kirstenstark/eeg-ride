@@ -10,7 +10,9 @@ def correct_trials(results, data, rt=None):
     if isinstance(data, Epochs):
         is_epochs = True
         epochs = data.copy()
-        data = epochs.get_data().copy()
+        ch_types = np.array(epochs.get_channel_types())
+        eeg_ixs = np.where(ch_types == 'eeg')[0]
+        data = epochs.get_data(picks='eeg').copy()
         data = np.swapaxes(data, 0, 2)
 
     n_trials = data.shape[2]
@@ -38,7 +40,7 @@ def correct_trials(results, data, rt=None):
         return data_corr
 
     data_corr = np.swapaxes(data_corr, 0, 2)
-    epochs._data = data_corr
+    epochs._data[:, eeg_ixs, :] = data_corr
 
     return epochs
 
