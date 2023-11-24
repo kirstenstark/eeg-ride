@@ -1,7 +1,7 @@
 from warnings import warn
 
 import numpy as np
-from mne import Epochs
+from mne import Epochs, EpochsArray
 
 from .baseline import baseline
 from .helpers import round_like_matlab
@@ -28,7 +28,7 @@ def ride_call(data, cfg):
     cfg0 = cfg.copy()
 
     # If necessary, extract Numpy arra from MNE epochs object
-    if isinstance(data, Epochs):
+    if isinstance(data, (Epochs, EpochsArray)):
         data = data.get_data(picks='eeg')
         data = np.swapaxes(data, 0, 2)
 

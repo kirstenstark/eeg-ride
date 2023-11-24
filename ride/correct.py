@@ -1,5 +1,5 @@
 import numpy as np
-from mne import Epochs
+from mne import Epochs, EpochsArray
 
 from .helpers import round_like_matlab
 
@@ -7,7 +7,7 @@ from .helpers import round_like_matlab
 def correct_trials(results, data, rt=None):
     """Subtracts the 'r' component from the single trial data, shifted by the RTs."""
 
-    if isinstance(data, Epochs):
+    if isinstance(data, (Epochs, EpochsArray)):
         is_epochs = True
         epochs = data.copy()
         ch_types = np.array(epochs.get_channel_types())
