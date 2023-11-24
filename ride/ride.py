@@ -46,7 +46,8 @@ def ride_call(data, cfg):
 
         if isinstance(cfg.comp_latency[j], (int, float)):
             int_value = cfg.comp_latency[j]
-            print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
+            if cfg.prg == 1:
+                print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
             cfg.comp_latency[j] = np.array([[int_value]] * d3)
 
         if cfg.comp_name[j] == 'r':
