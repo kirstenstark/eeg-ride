@@ -1,5 +1,6 @@
 import numpy as np
 from mne import Epochs, EpochsArray
+from warnings import warn
 
 from .helpers import round_like_matlab
 
@@ -16,31 +17,44 @@ def correct_trials(results, data, rt=None):
         data = np.swapaxes(data, 0, 2)
 
     n_trials = data.shape[2]
-
     if rt is None:
-        rt = results.latencies['r'].copy()
-        n_rt = len(rt)
-        assert n_trials == n_rt, \
-            'When passing different single trial data than the ones used ' + \
-            'to perform RIDE, you must also pass the corresponding RTs'
-    else:
-        rt = rt / results.cfg.re_samp
-        rt = round_like_matlab(rt - np.median(rt))
-        rt = rt * results.cfg.re_samp
+        rt = results.latency_all[1].copy()
+        assert n_trials == len(rt), \
+            'Looks like number of trials in data and RT are different. ' + \
+            'You need to pass new RT if different data are used for RIDE estimation and correction.'
+    
+    rt = rt / results.cfg.re_samp
+        # delete rt=nan and rt=0 trials from rt array
+    nan_ixs = set(np.where(np.isnan(rt))[0])
+    nan_ixs.update(np.where(rt == 0)[0])
+    nan_ixs=list(nan_ixs)
+    rt_ride = np.delete(rt, nan_ixs)
+    median_rt = np.median(rt_ride)
+    rt = round_like_matlab(rt_ride - median_rt)
 
+    rt = rt * results.cfg.re_samp
+
+        # delete rt=nan and rt=0 trials from data
+    warn(f'Trials {nan_ixs} will NOT be RIDE corrected because their latency is NaN or zero.')
+    data = np.delete(data, nan_ixs, axis=2)
+
+    n_trials = data.shape[2]
     srate = 1000.0 / results.cfg.samp_interval
 
     data_corr = data - move3(np.repeat(results.comps['r'][:, :, np.newaxis],
                                        n_trials,
                                        axis=2),
-                             np.round(rt*srate/1000).astype(int).flatten())
+                             np.round(rt*srate/1000))   
 
     if not is_epochs:
 
         return data_corr
 
     data_corr = np.swapaxes(data_corr, 0, 2)
-    epochs._data[:, eeg_ixs, :] = data_corr
+    good_ixs = [ix for ix in range(len(epochs)) if ix not in nan_ixs]
+    data_epochs = epochs._data[:, eeg_ixs, :]
+    data_epochs[good_ixs, :, :] = data_corr
+    epochs._data[:, eeg_ixs, :] = data_epochs
 
     return epochs
 

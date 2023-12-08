@@ -7,6 +7,7 @@ class RideResults:
     def __init__(self,
                  erp,
                  latency0,
+                 latency_all,
                  erp_new=None,
                  residue=None,
                  comps=None,
@@ -29,6 +30,7 @@ class RideResults:
 
         self.erp = erp
         self.latency0 = latency0
+        self.latency_all = latency_all
         self.erp_new = erp_new
         self.residue = residue
         self.comps = comps
