@@ -48,7 +48,7 @@ def correct_trials(results, data, rt=None):
 def move3(data, latency):
     """Shifts single trial data ('r' component) by the single trial latency."""
 
-    latency = np.round(latency).astype(int)
+    latency = round_like_matlab(latency)
     d1, d2, d3 = data.shape
     temp = np.zeros((d1, d2, d3), dtype=data.dtype)
 

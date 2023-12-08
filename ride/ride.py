@@ -56,7 +56,7 @@ def ride_call(data, cfg):
             cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] > cfg.epoch_twd[1]] = cfg.epoch_twd[1]
 
         cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
-        cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j])) 
+        cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j]))
 
         cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]
 
