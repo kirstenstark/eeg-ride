@@ -18,3 +18,8 @@ _version.py
 /matlab/matlab_example/single_trials_small/
 /matlab/matlab_example/chanlocs.mat
 *.DS_Store
+
+# Documentation
+/doc/_build/
+/doc/source/generated/
+/doc/source/examples/output/

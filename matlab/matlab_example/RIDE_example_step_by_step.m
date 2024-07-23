@@ -29,15 +29,15 @@
 
 clear all;
 % add toolbox used in this script
-addpath(genpath('N:\Software\Matlab_toolboxen\eeglab13_5_4b'));
-addpath(genpath('N:\matlab\'));%'N:\Software\Matlab_toolboxen\RIDE_call'));
+%addpath(genpath('N:\Software\Matlab_toolboxen\eeglab13_5_4b'));
+%addpath(genpath('N:\matlab\'));%'N:\Software\Matlab_toolboxen\RIDE_call'));
 
 % add working folder for this project
-addpath(genpath('C:\Users\neuro-lab\Documents\Research projects\eeg-ride\matlab\matlab_example\'));
+addpath(genpath('/Users/alexander/Code/eeg-ride/matlab/matlab_example/'));
 
 % Basic Path of your experiments RIDE folder (this folder contains your raw, mat and output folders): former RIDE script (Guang)
 % define folders for the processed data 
-ridefolder = 'C:\Users\neuro-lab\Documents\Research projects\eeg-ride\matlab\matlab_example\';
+ridefolder = '/Users/alexander/Code/eeg-ride/matlab/matlab_example/';
 
 twd = [-100,1200]; %the time window for the epoched data
         % NOTE: if segmenated epoch is too long and covers triggers from the next trial, make sure
@@ -72,7 +72,7 @@ for j = 1:1%length(sub)
     disp(j);
     
     for k = 1:1%length(con)
-  load([ridefolder,'mat\',sub{j},'_',con{k},'.mat'],'data','rt');    % Path definitions correct?
+  load([ridefolder,'mat/',sub{j},'_',con{k},'.mat'],'data','rt');    % Path definitions correct?
         cfg = [];
      % Abtastrate ist 500Hz, daher 2, da alle 2ms aufgenommen wird
         cfg.samp_interval = 2;
@@ -467,10 +467,6 @@ for section = 1:1%%%%%final data%%%%
     bl_wd = fix(-cfg.epoch_twd(1)/cfg.samp_interval)+1:fix(-cfg.epoch_twd(1)/cfg.samp_interval+cfg.bl/cfg.samp_interval);%baseline time window
     for j = 1:cfg.comp_num
         component(:,:,j) = interp2d(comp(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline'); % !!! only relevant if data has been downsampled
-        
-        
-        %CONTINUE HERE NEXT TIME (25/8/23)
-        
         component(:,:,j) = baseline(component(:,:,j),bl_wd);
         component1(:,:,j) = interp2d(comp1(:,:,j),round(linspace(1,epoch_length,d1)),1:epoch_length,'spline');
         component1(:,:,j) = baseline(component1(:,:,j),bl_wd);

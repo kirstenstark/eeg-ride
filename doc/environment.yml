@@ -1,0 +1,18 @@
+name: eeg-ride
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ipykernel
+  - jupytext
+  - myst-nb
+  - pip
+  - python=3.11
+  - quarto
+  - sphinx-book-theme=0.3.3
+  - sphinx-copybutton
+  - sphinx-gallery=0.7.0
+  - sphinxcontrib-bibtex
+  - pip:
+      - pybtex-apa-style
+      - sphinxcontrib-apa
