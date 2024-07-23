@@ -116,7 +116,7 @@ def ride_iter(data, cfg):
                 # TODO: !!!! IMPORTANT: Next line is only for testing purposes, delete later!!
                 # temp1[:,44] = np.nan     # # TODO: !!!! IMPORTANT: This line is only for testing purposes, delete later!!
                 temp1 = np.reshape(temp1.T[~np.isnan(temp1.T)], (d1, d2), order='F')
-                com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1)]
+                com_c[:,c] = temp0[np.arange(max_latency[c], max_latency[c]+d1, dtype=int)]
                 com_c1[:,:,c] = temp1
             # End of if-loop
         # End of stream-flow for loop

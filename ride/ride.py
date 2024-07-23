@@ -36,12 +36,15 @@ def ride_call(data, cfg):
     d1, d2, d3 = data.shape
     epoch_length = d1
     erp = data.mean(axis=2)
-    results = RideResults(erp=erp, latency0=cfg.comp_latency.copy())
+    results = RideResults(erp=erp, latency0=cfg.comp_latency.copy(), latency_all=cfg.comp_latency.copy())
 
     rs = cfg.re_samp / cfg.samp_interval
     data = data[round_like_matlab(np.linspace(0, d1 - 1, int(d1 / rs))), :, :]
     d1, d2, d3 = data.shape  # New size after down samping
+    
+    nan_ixs = set()
 
+    # define nan_ixs (and RT = 0 trials)
     for j in range(cfg.comp_num):
 
         if isinstance(cfg.comp_latency[j], (int, float)):
@@ -49,16 +52,35 @@ def ride_call(data, cfg):
             if cfg.prg == 1:
                 print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
             cfg.comp_latency[j] = np.array([[int_value]] * d3)
+        
+        nan_ixs_comp = np.where(np.isnan(cfg.comp_latency[j]))[0]
+        nan_ixs.update(nan_ixs_comp)
 
+        if cfg.comp_name[j] == 'r':
+            nan_ixs_comp = np.where(cfg.comp_latency[j]==0)[0]
+            nan_ixs.update(nan_ixs_comp)
+    
+    nan_ixs = list(nan_ixs)
+    if len(nan_ixs) > 0:
+        warn(f'Trials {nan_ixs} will not be used for RIDE estimation because their latency is NaN or zero.')
+        data = np.delete(data, nan_ixs, axis=2)
+        d1, d2, d3 = data.shape  # New size after nan removal
+        for j in range(cfg.comp_num):
+            cfg.comp_latency[j] = np.delete(cfg.comp_latency[j], nan_ixs, axis=0)
+            if cfg.comp_name[j] == 'r':
+                results.latency0[j] = np.delete(results.latency0[j], nan_ixs, axis=0)
+
+    # Resample data
+    for j in range(cfg.comp_num):
         if cfg.comp_name[j] == 'r':
             cfg.comp_twd_samp[j] = cfg.comp_twd_samp[j] + np.median(results.latency0[j])
             cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] < cfg.rwd] = cfg.rwd
             cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] > cfg.epoch_twd[1]] = cfg.epoch_twd[1]
 
         cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
-        cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j])) 
+        cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j]))
 
-        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]
+        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]          
 
     stop = 1
 
