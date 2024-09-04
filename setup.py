@@ -32,6 +32,7 @@ if __name__ == "__main__":
             'matplotlib',
             'mne',
             'numpy',
+            'pandas',
             'scipy'
         ],
         python_requires='>=3.8',
