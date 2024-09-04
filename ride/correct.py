@@ -1,6 +1,7 @@
+from warnings import warn
+
 import numpy as np
 from mne import Epochs, EpochsArray
-from warnings import warn
 
 from .helpers import round_like_matlab
 
