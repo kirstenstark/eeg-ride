@@ -17,15 +17,15 @@ if __name__ == "__main__":
         long_description_content_type='text/markdown',
         url='https://github.com/kirstenstark/eeg-ride',
         project_urls={
-            'Issue trackers': 'https://github.com/kirstenstark/eeg-ride/issues',
+            'Issue trackers': 'https://github.com/kirstenstark/eeg-ride/issues'
         },
         classifiers=[
-            'Programming Language :: Python :: 3.8',
-            'Programming Language :: Python :: 3.9',
-            'Programming Language :: Python :: 3.10',
-            'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
             'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering'
         ],
         packages=find_packages(),
         install_requires=[
