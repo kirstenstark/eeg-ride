@@ -1,38 +1,83 @@
 Quickstart
 ==========
 
-The pipeline provides a single high-level function, ``group_pipeline()``, to carry out a full EEG analysis on a group of participants.
+Here is one quick example for extracting stimulus- and response-related components from the EEG data of a single participant.
 
-Here is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: ``semantics`` (e.g., related versus unrelated words) and emotional ``context`` (e.g., emotionally negative versus neutral).
+To get started, we need to kinds of input data:
 
-Code block 1: Read in data
+* The preprocessed EEG data, typically generated using the `Epochs` object from `MNE-Python <https://mne.tools/stable/index.html>`_.
+  This is a data matrix with the shape ``(n_trials, n_channels, n_timepoints)`` that contains the single trial ERP amplitudes in microvolts.
+  Note that for RIDE to work correctly, the data should be cleaned, e.g., by removing eye artifacts, filtering, and rejecting high-amplitude artifacts.
 
-Code block 2: define cfg
+* A list or array of reaction times (RTs) for each trial.
+  These are typically extracted from a behavioral log file written by the experiment presentation software.
+  The length of the RT array has to match the number of epochs in the EEG data.
 
-Code block 3: Call ride 
-
+Here we assume that the epochs have been stored in MNE's ``.fif`` format and the the RTs are stored in a column of the tab-separated log file.
 
 .. code-block:: python
 
-    from pipeline import group_pipeline
+    import pandas as pd
+    from mne import read_epochs
+
+    epochs = read_epochs('sub-01_epo.fif')
+
+    log_df = pd.read_csv('sub-01_logfile.txt', sep='\t')
+    rt = log_df['RT']
+
+In the next step, we define the parameters for RIDE.
+
+.. code-block:: python
+
+    from ride import RideCfg
 
     cfg = RideCfg(comp_name=['s', 'r'],
                   comp_twd=[[0, 600], [-300, 300]],
                   comp_latency=[0, rt],
                   sfreq=500)
 
-            
+Here we've specified:
 
-In this example we have specified:
+* The names of the RIDE components that should be extracted.
+  At the moment, only one stimulus-related (``'s'``) and one response-related (``'r'``) component are supported.
 
-- ``raw_files``, ``log_files``, ``output_dir``, ``besa_files``: The paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction
+* The time windows (in milliseconds) in which the RIDE are searched for.
+  For the ``'s'`` component, this time window is relative to stimulus onset, while for the ``'r'`` component, it is relative to the reaction time of the trial.
+  Note that for the ``'r'`` component, the time window should be long enough to cover any response-related artifact (e.g., speech artifact) entirely.
 
-- ``triggers``: The four different numerical EEG trigger codes corresponding to each of the four cells in the 2 × 2 design
+* The single trial latencies of the RIDE components.
+  For the ``'s'`` component, this is always zero, as this is when the stimulus happened relative to the epoch.
+  For the ``'r'`` component, this is the list or array of single trial reaction times that we have loaded above.
 
-- ``skip_log_conditions``: Our log files may contain additional trials from a "filler" condition without corresponding EEG trials/triggers. These filler trials are marked with the condition label ``'filler'`` in the log file column ``semantics``
+* The sampling frequency of the EEG data.
+  If your input EEG data is a NumPy array, you need to know the sampling frequency from the EEG acquisition.
+  If your input EEG data is an ``mne.Epochs`` object, you can check the sampling frequency using `epochs.info.sfreq`.
 
-- ``components``: The *a priori* defined time windows and regions of interest for the relevant ERP components (N400 and P600)
+For additional (optional) input arguments, check the function reference for ``ride.RideCfg``.
 
-- ``average_by``: The relevant groupings of trials for which by-participant averaged waveforms should be created. The keys (e.g., ``'related_negative'``) are custom labels of our choice; the values are the corresponding logical conditions that must be met for a trial to be included in the average.
+Finally, we can run the RIDE procedure using our input EEG data and the configuration:
 
-For (way) more options, see :doc:`Pipeline inputs <inputs_py>`.
+.. code-block:: python
+
+    from ride import ride_call
+
+    results = ride_call(epochs, cfg)
+
+We can use the results from RIDE in a few different ways.
+The most typical use case is to remove the ``'r'`` component from the single trial data to remove any response-related artifacts (e.g., speech artifacts).
+To do this, the package provides the convenience function ``correct_trials``, taking the fitted RIDE results and the original EEG epochs as inputs:
+
+.. code-block:: python
+
+    from ride import correct_trials
+
+    epochs_corr = correct_trials(results, epochs)
+
+
+TO DO:
+
+* Create tips and tricks page with:
+
+    * Describe double rejection procedure / how to correct different epochs than used during RIDE fitting
+
+* Mention in quickstart that RIDE needs to be run separately for each condition
