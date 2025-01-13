@@ -65,6 +65,15 @@ Finally, we can run the RIDE procedure using our input EEG data and the configur
 
     results = ride_call(epochs, cfg)
 
+To inspect the result of the RIDE procedure, you can plot them:
+
+
+.. code-block:: python
+
+    results.plot()
+
+Here you can see the original ERP (all channels) along with the generated RIDE components ``'s'`` (capturing the stimulus-related activity) and ``'r'`` (capturing the response-related activity, e.g., the speech artifact).
+
 We can use the results from RIDE in a few different ways.
 The most typical use case is to remove the ``'r'`` component from the single trial data to remove any response-related artifacts (e.g., speech artifacts).
 To do this, the package provides the convenience function ``correct_trials``, taking the fitted RIDE results and the original EEG epochs as inputs:
@@ -75,11 +84,11 @@ To do this, the package provides the convenience function ``correct_trials``, ta
 
     epochs_corr = correct_trials(results, epochs)
 
+The corrected epochs can then be used for further analysis, e.g., ERP analysis, time-frequency analysis, or source localization. 
+
 
 TO DO:
 
 * Create tips and tricks page with:
 
     * Describe double rejection procedure / how to correct different epochs than used during RIDE fitting
-
-* Mention in quickstart that RIDE needs to be run separately for each condition
