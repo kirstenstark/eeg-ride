@@ -8,6 +8,8 @@ To get started, we need to kinds of input data:
 * The preprocessed EEG data, typically generated using the `Epochs` object from `MNE-Python <https://mne.tools/stable/index.html>`_.
   This is a data matrix with the shape ``(n_trials, n_channels, n_timepoints)`` that contains the single trial ERP amplitudes in microvolts.
   Note that for RIDE to work correctly, the data should be cleaned, e.g., by removing eye artifacts, filtering, and rejecting high-amplitude artifacts.
+  RIDE needs to be run separately for each experimental condition.
+  If you have multiple conditions, please subset the data in an additional step. 
 
 * A list or array of reaction times (RTs) for each trial.
   These are typically extracted from a behavioral log file written by the experiment presentation software.
