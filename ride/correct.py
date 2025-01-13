@@ -24,6 +24,7 @@ def correct_trials(results, data, rt=None):
             'Looks like number of trials in data and RT are different. ' + \
             'You need to pass new RT if different data are used for RIDE estimation and correction.'
     
+    rt = np.array(rt)
     rt = rt / results.cfg.re_samp
         # delete rt=nan and rt=0 trials from rt array
     nan_ixs = set(np.where(np.isnan(rt))[0])
