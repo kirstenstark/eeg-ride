@@ -52,6 +52,8 @@ def ride_call(data, cfg):
             if cfg.prg == 1:
                 print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
             cfg.comp_latency[j] = np.array([[int_value]] * d3)
+
+        cfg.comp_latency[j] = np.array(cfg.comp_latency[j])
         
         nan_ixs_comp = np.where(np.isnan(cfg.comp_latency[j]))[0]
         nan_ixs.update(nan_ixs_comp)
