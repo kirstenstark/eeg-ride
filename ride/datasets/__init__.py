@@ -1,0 +1,1 @@
+from .stark2025 import get_stark2025
