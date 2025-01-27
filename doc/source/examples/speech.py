@@ -9,37 +9,41 @@ blablablubb
 # %%  
 # # Loading python modules
 
-# %% 
+# %%
+import matplotlib.pyplot as plt 
 import pandas as pd
 from mne import Epochs, events_from_annotations, set_eeg_reference
 from mne.io import read_raw
 from pipeline.preprocessing import add_heog_veog, correct_ica
 
-from ride import RideCfg, ride_call, correct_trials
+from ride import RideCfg, correct_trials, ride_call
+from ride.datasets import get_stark2025
 
 # %%
 # # Downloading example data
 
 # %% 
+log_file, vhdr_file = get_stark2025()
 
 #%% 
 # # Read RT data
 
 #%%
-log_df = pd.read_csv('/Users/kirstenstark/Documents/research/research_projects/lying_lab_EEG/data/raw/pilots/log/2_memory.txt', 
-                     sep='\t', encoding='ISO-8859-1')
+log_df = pd.read_csv(log_file, sep='\t', encoding='ISO-8859-1')
 log_df = log_df[log_df['bedingung_trigger_erp2'] == 221]
 
 # %% 
 # # Preprocessing 
+#
+# blablabla 
 
 # %%
-raw = read_raw("/Users/kirstenstark/Documents/research/research_projects/lying_lab_EEG/data/eeg_VP1/pilot/memory/VP0302.vhdr", preload=True)
+raw = read_raw(vhdr_file, preload=True)
 raw = raw.set_channel_types({'IO1': 'eog', 'A2': 'misc', 'audio': 'misc', 'pulse': 'misc'})
 raw.set_montage('easycap-M1')
 raw, _ = set_eeg_reference(raw, ref_channels='average')
 raw = add_heog_veog(raw)
-#raw, _ = correct_ica(raw, n_components=15)
+raw, _ = correct_ica(raw, n_components=15)
 raw = raw.filter(0.1, 40.0)
 events, event_id = events_from_annotations(raw)
 event_id = {'simple_naming': 221}
@@ -80,13 +84,21 @@ results.plot()
 epochs_corr = correct_trials(results, epochs)
 
 # %%
-# # Inspecting the RIDE results: Plotting the raw and corrected data
+# # Inspecting the RIDE results: Plotting the raw and corrected data for one exemplary epoch
 
 # %%
-epochs.average().plot(ylim=dict(eeg=[-25, 25]), titles=dict(eeg="Uncorrected data"), spatial_colors=True)
-epochs_corr.average().plot(ylim=dict(eeg=[-25, 25]), titles=dict(eeg="RIDE-corrected data"), spatial_colors=True)
+data = epochs.pick('Fp1')[0].get_data().squeeze()
+data_corr = epochs_corr.pick('Fp1')[0].get_data().squeeze()
+times = epochs.times
+
+plt.plot(times,data)
+plt.plot(times,data_corr)
+plt.legend(['uncorrected', 'corrected'])
+plt.xlabel('Time (s)')
+plt.ylabel('Fp1 Amplitude (V)')
 
 # %% 
 # # To Do: VERWEIS AUF PIPELINE 
 # # To Do: Fix RIDE
 # # To Do: uncomment ICA
+# %%
