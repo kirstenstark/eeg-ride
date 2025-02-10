@@ -130,3 +130,4 @@ nb_custom_formats = {
     '.Rmd': ['jupytext.reads', {'fmt': 'Rmd'}]
 }
 nb_render_image_options = {'width': '70%', 'align': 'center'}
+nb_merge_streams = True

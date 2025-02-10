@@ -42,3 +42,6 @@ One typical application is for correction of speech artifacts as described and v
    :caption: Contents:
 
    installation
+   quickstart
+   examples/speech
+   tips

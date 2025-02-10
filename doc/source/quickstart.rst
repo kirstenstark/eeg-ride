@@ -85,10 +85,3 @@ To do this, the package provides the convenience function ``correct_trials``, ta
     epochs_corr = correct_trials(results, epochs)
 
 The corrected epochs can then be used for further analysis, e.g., ERP analysis, time-frequency analysis, or source localization. 
-
-
-TO DO:
-
-* Create tips and tricks page with:
-
-    * Describe double rejection procedure / how to correct different epochs than used during RIDE fitting
