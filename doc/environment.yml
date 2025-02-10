@@ -16,3 +16,4 @@ dependencies:
   - pip:
       - pybtex-apa-style
       - sphinxcontrib-apa
+      - hu-neuro-pipeline
