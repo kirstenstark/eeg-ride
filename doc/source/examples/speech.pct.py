@@ -167,7 +167,7 @@ _ = plt.xlabel('Time (s)')
 _ = plt.ylabel('Fp1 Amplitude (V)')
 
 # %% [markdown]
-# ## Use RIDE in our pipeline
+# ## Using RIDE in our pipeline
 #
 # Instead of manually coding your preprocessing and RIDE correction, you can also use our [`hu-neuro-pipeline`](https://github.com/alexenge/hu-neuro-pipeline) package based on the [Frömer et al. (2018)](https://doi.org/10.3389/fnins.2018.00048) pipeline.
 # If you add the `perform_ride=True` argument, this will perform the preprocessing and
