@@ -1,21 +1,21 @@
 Quickstart
 ==========
 
-Here is one quick example for extracting stimulus- and response-related components from the EEG data of a single participant.
+Here is one short example for extracting stimulus- and response-related components from the EEG data of a single participant.
 
-To get started, we need to kinds of input data:
+To get started, we need two kinds of input data:
 
-* The preprocessed EEG data, typically generated using the `Epochs` object from `MNE-Python <https://mne.tools/stable/index.html>`_.
+* The **preprocessed EEG data**, typically generated using the ``Epochs`` object from `MNE-Python <https://mne.tools/stable/index.html>`_.
   This is a data matrix with the shape ``(n_trials, n_channels, n_timepoints)`` that contains the single trial ERP amplitudes in microvolts.
   Note that for RIDE to work correctly, the data should be cleaned, e.g., by removing eye artifacts, filtering, and rejecting high-amplitude artifacts.
   RIDE needs to be run separately for each experimental condition.
   If you have multiple conditions, please subset the data in an additional step. 
 
-* A list or array of reaction times (RTs) for each trial.
+* A list or array of **reaction times (RTs)** for each trial.
   These are typically extracted from a behavioral log file written by the experiment presentation software.
   The length of the RT array has to match the number of epochs in the EEG data.
 
-Here we assume that the epochs have been stored in MNE's ``.fif`` format and the the RTs are stored in a column of the tab-separated log file.
+Here we assume that the epochs have been stored in MNE's ``.fif`` format and that the RTs are stored in a column of the tab-separated log file.
 
 .. code-block:: python
 
@@ -43,17 +43,17 @@ Here we've specified:
 * The names of the RIDE components that should be extracted.
   At the moment, only one stimulus-related (``'s'``) and one response-related (``'r'``) component are supported.
 
-* The time windows (in milliseconds) in which the RIDE are searched for.
+* The time windows (in milliseconds) in which the RIDE components are searched for.
   For the ``'s'`` component, this time window is relative to stimulus onset, while for the ``'r'`` component, it is relative to the reaction time of the trial.
   Note that for the ``'r'`` component, the time window should be long enough to cover any response-related artifact (e.g., speech artifact) entirely.
 
 * The single trial latencies of the RIDE components.
-  For the ``'s'`` component, this is always zero, as this is when the stimulus happened relative to the epoch.
-  For the ``'r'`` component, this is the list or array of single trial reaction times that we have loaded above.
+  For the ``'s'`` component, this is always zero.
+  For the ``'r'`` component, this is the list or array of single trial reaction times.
 
 * The sampling frequency of the EEG data.
   If your input EEG data is a NumPy array, you need to know the sampling frequency from the EEG acquisition.
-  If your input EEG data is an ``mne.Epochs`` object, you can check the sampling frequency using `epochs.info.sfreq`.
+  If your input EEG data is an ``mne.Epochs`` object, you can check the sampling frequency using ``epochs.info.sfreq``.
 
 For additional (optional) input arguments, check the function reference for ``ride.RideCfg``.
 
