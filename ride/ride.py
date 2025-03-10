@@ -82,7 +82,57 @@ def ride_call(data, cfg):
         cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
         cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j]))
 
-        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]          
+        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]  
+
+    # Initial estimation of the latency of C component
+# %     for section = 1:1%initial estimation of the latency of C---------------------------------------
+# %     for initial_c = 1:1 
+# %             n_of_c = 0;c_i = 0;
+# %             for j = 1:cfg.comp_num
+# %                 if ischar(cfg.comp.latency{j})
+# %                         if cfg.prg == 1 disp(['woody_for_',cfg.comp.name{j}]);end
+# %                         n_of_c = n_of_c + 1;c_i(n_of_c) = j;
+# %                         temp = 1:d2;temp1 = cfg.comp.twd{j};
+# %                             if isfield(cfg,'template')
+# %                                 if strcmp(cfg.template.method,'g_mean')
+# %                                     cfg.temp = template(temp1(1):temp1(2),temp);
+# %                                 end
+# %                                 if isfield(cfg.template,'chan')
+# %                                     temp = cfg.template.chan;
+# %                                     if isfield(cfg.template,'hann_amp')
+# %                                         cfg.template.hann_amp = cfg.template.hann_amp(cfg.template.chan);
+# %                                     end
+# %                                 end
+# %                             end
+# %                             %-------using Woody's method by default
+# %                         cfg.comp.latency{j} = woody(data(temp1(1):temp1(2),temp,:),cfg,cfg.dur{j});%
+                        
+# %                 end
+# %             end
+# %     end
+# % end
+# Translate the entire section to Python
+    for j in range(cfg.comp_num):
+        n_of_c = 0
+        c_i = []
+        if isinstance(cfg.comp_latency[j], str): # ToDo: Change latency of C component from 'unknown' to xx
+            if cfg.prg == 1:
+                print(f'woody_for_{cfg.comp_name[j]}')
+            n_of_c += 1
+            c_i.append(j)
+            temp = np.arange(d2)
+            temp1 = cfg.comp_twd_samp[j]
+            # ToDo: Check code once 'template' is implemented
+            if hasattr(cfg, 'template'):
+                if cfg.template.method == 'g_mean':
+                    cfg.temp = cfg.template[temp1[0]:temp1[1], temp]
+                if hasattr(cfg.template, 'chan'):
+                    temp = cfg.template.chan
+                    if hasattr(cfg.template, 'hann_amp'):
+                        cfg.template.hann_amp = cfg.template.hann_amp[cfg.template.chan]
+            cfg.comp_latency[j] = woody(data[temp1[0]:temp1[1], temp, :], cfg, cfg.dur[j])
+
+        
 
     stop = 1
 
