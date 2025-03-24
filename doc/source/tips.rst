@@ -15,7 +15,7 @@ One step where the preprocessing prior to RIDE may differ from your usual prepro
 Oftentimes, researchers use epoch durations that end at 0.8, 1, or 2 s after stimulus onset, since this is usually long enough to capture the ERP of interest.
 However, some speech artifacts will last significantly longer than this.
 Since it is helpful for the performance of RIDE to capture the entire speech artifact, you may choose an epoch duration that is longer than what is typically used (e.g., ending at 3 s after stimulus onset).
-You can use a time course or butterfly plot of your epochs to determine how long the speech artifacts are in your own data (that is, at what point the signal at most channels is back at baselin).
+You can use a time course or butterfly plot of your epochs to determine how long the speech artifacts are in your own data (that is, at what point the signal at most channels is back at baseline).
 
 To save disk space and speed up subsequent analysis, you can shorten your epochs to the usual length (e.g., ending at 1 s after stimulus onset) *after* you have performed the RIDE correction (e.g., using MNE's ``Epochs.crop()`` method).
 
@@ -25,7 +25,7 @@ RIDE and artifact rejection
 Many EEG preprocessing pipelines involve the rejection (i.e., deletion) of "bad" epochs, typically using some kind of amplitude-based threshold.
 For instance, the ``reject`` argument in MNE's ``Epochs`` class uses a peak-to-peak threshold that, if exceeded at any one channel, marks the epoch as "bad" in order to exclude it from the downstream analysis.
 
-You typically want to perform artifact rejection *before* feeding the epochs into RIDE, since RIDE works best with epochs that have already been cleaned from all non-speech-related artifacts (as discussed abvoe).
+You typically want to perform artifact rejection *before* feeding the epochs into RIDE, since RIDE works best with epochs that have already been cleaned from all non-speech-related artifacts (as discussed above).
 However, note that the speech artifacts themselves can be rather large.
 Therefore, you may want to use a rather lenient artifact rejection threshold (e.g., 200/250 µV) before RIDE correction, or otherwise you will lose many epochs and therefore reduce your statistical power---even though RIDE would have been able to "rescue" these epochs by removing the speech artifacts.
 
@@ -57,7 +57,7 @@ However, there are currently a few differences that might be worth noting:
 
 * The Python version also currently lacks support for microsaccade identification, which is included in the MATLAB version.
 
-* The Python version contatains a new function (``ride.correct_trials``) that can be used to correct spech artifacts on the single trial level.
+* The Python version contains a new function (``ride.correct_trials``) that can be used to correct spech artifacts on the single trial level.
   Specifically, the function takes as its inputs the fitted results from the RIDE correction and a set of EEG epochs (typically the same that were fed into RIDE).
   It then subtracts the ``'r'`` component (thought to captrue the speech artifact) from each epoch, shifted by the specific response onset for that epoch.
 
