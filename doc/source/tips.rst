@@ -29,7 +29,11 @@ You typically want to perform artifact rejection *before* feeding the epochs int
 However, note that the speech artifacts themselves can be rather large.
 Therefore, you may want to use a rather lenient artifact rejection threshold (e.g., 200/250 µV) before RIDE correction, or otherwise you will lose many epochs and therefore reduce your statistical power---even though RIDE would have been able to "rescue" these epochs by removing the speech artifacts.
 
-We therefore recommend to perform amplitude-based rejection twice when using RIDE: once *before* the RIDE correction, using a rather lenient threshold to keep as many epochs in as possible, and once *after* RIDE correction, using a more stringent threshold to remove any remaining non-speech-related artifacts.
+One way to deal with this is to perform amplitude-based rejection twice when using RIDE: once *before* the RIDE correction, using a rather lenient threshold to keep as many epochs in as possible, and once *after* RIDE correction, using a more stringent threshold to remove any remaining non-speech-related artifacts.
+
+Another possibility is to run artifact rejection before RIDE correction and then use the results of RIDE to correct *all* the available trials, including the rejected ones.
+Then you can repeat the rejection step and you will likely end up with more trials than before because RIDE has removed the speech artifacts from some of the rejected trials.
+We have implemented this procedure in the ``hu-neuro-pipeline``` package (more details on that below).
 
 Time windows of RIDE components
 -------------------------------
