@@ -53,14 +53,15 @@ def ride_call(data, cfg):
                 print(f'WARNING: Extending integer latency {int_value} to a vector of {int_value}s (one per trial)')
             cfg.comp_latency[j] = np.array([[int_value]] * d3)
 
-        cfg.comp_latency[j] = np.array(cfg.comp_latency[j])
-        
-        nan_ixs_comp = np.where(np.isnan(cfg.comp_latency[j]))[0]
-        nan_ixs.update(nan_ixs_comp)
-
-        if cfg.comp_name[j] == 'r':
-            nan_ixs_comp = np.where(cfg.comp_latency[j]==0)[0]
+        if not isinstance(cfg.comp_latency[j], str):
+            cfg.comp_latency[j] = np.array(cfg.comp_latency[j])
+            
+            nan_ixs_comp = np.where(np.isnan(cfg.comp_latency[j]))[0]
             nan_ixs.update(nan_ixs_comp)
+
+            if cfg.comp_name[j] == 'r':
+                nan_ixs_comp = np.where(cfg.comp_latency[j]==0)[0]
+                nan_ixs.update(nan_ixs_comp)
     
     nan_ixs = list(nan_ixs)
     if len(nan_ixs) > 0:
@@ -79,10 +80,17 @@ def ride_call(data, cfg):
             cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] < cfg.rwd] = cfg.rwd
             cfg.comp_twd_samp[j][cfg.comp_twd_samp[j] > cfg.epoch_twd[1]] = cfg.epoch_twd[1]
 
-        cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
-        cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j]))
+        if not isinstance(cfg.comp_latency[j], str):
+            cfg.comp_latency[j] = cfg.comp_latency[j] / cfg.re_samp
+            cfg.comp_latency[j] = round_like_matlab(cfg.comp_latency[j]-np.median(cfg.comp_latency[j]))
 
-        cfg.comp_twd_samp[j] = np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1]  
+        cfg.comp_twd_samp[j] = np.array(np.fix((cfg.comp_twd_samp[j] - cfg.epoch_twd[0])/cfg.re_samp)+[1, -1], dtype=int)
+
+    for j in range(cfg.comp_num):
+        if cfg.dur[j] is not None:
+            cfg.dur[j] = int(np.fix(cfg.dur[j] / cfg.re_samp))
+        else:
+            cfg.dur[j] = round((cfg.comp_twd_samp[j][1] - cfg.comp_twd_samp[j][0]) / 2)
 
     # Initial estimation of the latency of C component
 # %     for section = 1:1%initial estimation of the latency of C---------------------------------------
@@ -112,9 +120,9 @@ def ride_call(data, cfg):
 # %     end
 # % end
 # Translate the entire section to Python
+    n_of_c = 0
+    c_i = []
     for j in range(cfg.comp_num):
-        n_of_c = 0
-        c_i = []
         if isinstance(cfg.comp_latency[j], str): # ToDo: Change latency of C component from 'unknown' to xx
             if cfg.prg == 1:
                 print(f'woody_for_{cfg.comp_name[j]}')
@@ -130,13 +138,22 @@ def ride_call(data, cfg):
                     temp = cfg.template.chan
                     if hasattr(cfg.template, 'hann_amp'):
                         cfg.template.hann_amp = cfg.template.hann_amp[cfg.template.chan]
-            cfg.comp_latency[j] = woody(data[temp1[0]:temp1[1], temp, :], cfg, cfg.dur[j])
-
-        
+            cfg.comp_latency[j] = woody(data[(temp1[0]-1):temp1[1], temp, :],
+                                        cfg, cfg.dur[j])
 
     stop = 1
 
-    # TODO: Add "outer iteration" loop around here if there are one or more C components
+    latency_i = np.zeros(n_of_c)
+    for j in range(n_of_c): # Track latency evolution of C components
+        # TODO: Continue translating outer loop here
+        # latency_i[j] = cfg.comp.latency[c_i[j]]
+        # latency_i[j] = latency_i[j](:);
+    # %     l_change(:,j) = ones(d3,1);%track for evolution of the latency in order to terminate the iteration
+    # %     c_change(:,j) = ones(d3,1);%track for evolution of the correlation in order to terminate the iteration
+    # % end
+
+    # % if cfg.prg == 1 disp('RIDE decomposition: ');end
+    # outer_iter = 4;if n_of_c == 0 outer_iter = 1;end
 
     cfg1 = cfg.copy()
     cfg1.final = stop

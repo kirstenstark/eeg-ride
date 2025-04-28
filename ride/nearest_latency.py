@@ -30,8 +30,8 @@ def nearest_latency(signal, a):
     
     return f
 
-# Example usage:
-signal = [0, 1, 3, 7, 5, 2, 8, 6, 4, 9, 7]
-a = 5
-nearest_peak = nearest_latency(signal, a)
-print(nearest_peak)
+# # Example usage:
+# signal = [0, 1, 3, 7, 5, 2, 8, 6, 4, 9, 7]
+# a = 5
+# nearest_peak = nearest_latency(signal, a)
+# print(nearest_peak)

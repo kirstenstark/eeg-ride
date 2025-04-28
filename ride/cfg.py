@@ -16,6 +16,10 @@ class RideCfg:
                  bd=0.2,
                  prg=1,
                  bl=200,
+                 high_cutoff=4,
+                 xc='coeff',
+                 latency_search='most_prob',
+                 dur=None,
                  comp_twd_samp=None):
 
         assert len(comp_name) == len(comp_twd) == len(comp_latency), \
@@ -30,6 +34,9 @@ class RideCfg:
             if epoch_twd[1] < 1000:
                 warn('`epoch_twd` is less than 1000 ms post stimulus onset ' +
                      'and therefore probably to short for RIDE correction.')
+
+        if dur is None:
+            dur = [None] * len(comp_name)
 
         if comp_twd_samp is None:
             comp_twd_samp = comp_twd.copy()
@@ -46,6 +53,10 @@ class RideCfg:
         self.bd = bd
         self.prg = prg
         self.bl = bl
+        self.high_cutoff = high_cutoff
+        self.xc = xc
+        self.latency_search = latency_search
+        self.dur = dur
         self.comp_twd_samp = comp_twd_samp
 
     def copy(self):
@@ -60,4 +71,8 @@ class RideCfg:
                        bd=self.bd,
                        prg=self.prg,
                        bl=self.bl,
+                       high_cutoff=self.high_cutoff,
+                       xc=self.xc,
+                       latency_search = self.latency_search,
+                       dur=self.dur,
                        comp_twd_samp=self.comp_twd_samp)
